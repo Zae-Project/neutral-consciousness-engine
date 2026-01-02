@@ -1,0 +1,9 @@
+{
+    "m_ObjectHideFlags": 0,
+    "ros_ip_address": "127.0.0.1",
+    "ros_tcp_port": 10000,
+    "show_hud": true,
+    "keepalive_time": 0.5,
+    "network_timeout_seconds": 2,
+    "sleep_time_seconds": 0.01
+}
