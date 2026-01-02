@@ -26,137 +26,67 @@ The Neutral Consciousness Engine represents a novel approach to consciousness si
 
 Traditional approaches to consciousness preservation face a fundamental issue: the "teleporter problem." If we copy neural patterns to a new substrate, we create a duplicate rather than transferring the original consciousness. The subjective locus—the "I" that experiences reality—remains in the biological brain until death.
 
-### 1.2 The Watanabe Solution
-
-Watanabe's framework proposes a gradual integration model where:
-1. A synthetic hemisphere is gradually integrated with the biological brain
-2. Corpus callosum-like connections are established between substrates
-3. The unified consciousness spans both hemispheres
-4. Upon biological death, the conscious locus continues in the synthetic hemisphere
-
 ---
 
 ## 2. Core Principles
 
-### 2.1 The Generative Model (Predictive Coding)
+### 2.1 The Generative Model (True Predictive Coding)
 
-The brain continuously generates predictions about incoming sensory data. Our SNN implements this predictive processing framework using spike-timing-dependent plasticity (STDP) to learn and update its internal model.
+The system implements the "Generative Model" of consciousness. Unlike standard neural networks that react to input, our implementation continuously *predicts* incoming sensory data.
 
-```
-Architecture:
-    Input -> V1 Ensemble (1000 LIF neurons) -> Prediction
-                    ^                             |
-                    |_____________________________|  (Feedback)
-    
-    Prediction Error = Input - Prediction
-```
-
-**Energy Efficiency:** When the prediction error approaches zero, the system perfectly "understands" reality. This enables minimal bandwidth requirements for satellite transmission—only the error signal needs to be communicated, not the full sensory stream.
+**Key Architecture (`visual_cortex.py`):**
+- **Cortex:** 1000 LIF (Leaky Integrate-and-Fire) neurons representing the "Mind's Eye".
+- **Generative Loop:** Top-down connections where the Cortex predicts future inputs.
+- **Error Units:** A specialized population that computes `Error = Input - Prediction`.
+- **Optimization:** The system transmits only the *prediction error* (the "surprise") to the satellite, minimizing bandwidth requirements for the OISL link. This aligns with the Free Energy Principle (Friston, 2010).
 
 ### 2.2 The Watanabe Transfer Protocol
 
 A theoretical framework for interfacing biological neural networks with artificial substrates, ensuring continuity of consciousness during transfer.
 
-**Protocol Phases:**
-1. **Integration Phase:** Synthetic hemisphere establishes connections via corpus callosum interface
-2. **Calibration Phase:** Generative models synchronize between hemispheres
-3. **Verification Phase:** Subject reports unified perceptual field
-4. **Migration Phase:** Gradual shift of processing load to synthetic substrate
+---
 
-### 2.3 The Neural Firewall
+## 3. Safety & Cybersecurity (Hybrid TEE)
 
-A security layer that monitors spike rates and neural traffic patterns to prevent unauthorized access or "brainjacking" during consciousness transfer operations.
+### 3.1 The Latency/Security Trade-off
+
+Full Homomorphic Encryption (HE) introduces ~1.0s latency per sample (Nguyen et al., 2025), which exceeds the 500ms "Libet Buffer" required for seamless consciousness. Exceeding this buffer causes dissociation or "lag" in the subjective experience.
+
+### 3.2 Hybrid Trusted Execution Environment (TEE)
+
+To solve this, we implement a **Hybrid TEE Architecture**:
+1.  **Identity Handshake:** Uses **Homomorphic Encryption** for initial authentication and key exchange.
+2.  **Neural Stream:** Uses lightweight **AES-256** (<1ms latency) for high-speed spike transmission.
+3.  **Neural Firewall (`traffic_monitor.py`):** A dedicated module that inspects decypted packets for "Brainjacking" signatures before they reach the biological interface.
+
+### 3.3 Brainjacking Defense
+
+The Neural Firewall monitors for malicious stimulation patterns cited in *Pycroft et al. (2016)*:
+- **Frequency Analysis:** Detects induced gamma synchrony (>150Hz) indicative of seizure induction.
+- **Voltage Limiting:** Prevents excitotoxicity commands (>100mV equivalent).
+- **Kill Switch:** Physical disconnect of the electrode array upon detection of attack patterns.
 
 ---
 
-## 3. Architecture Overview
+## 4. Proposed Testing
 
-### 3.1 The Mind (ROS 2 Backend)
-
-- **Cortex SNN**: Implements visual processing and dream generation using Nengo
-- **Neural Firewall**: Security middleware with homomorphic encryption
-- **ROS-TCP Endpoint**: Bridge to the Unity virtual body
-
-### 3.2 The Body (Unity Frontend)
-
-- **Virtual Lab Scene**: 3D environment for sensory simulation
-- **Physics-Compliant Avatar**: Embodied representation
-- **ROS Bridge Client**: Communication with the neural backend
-
-### 3.3 The Bridge (Satellite Link)
-
-- **Optical Inter-Satellite Links (OISL)**: <20ms latency communication
-- **Prediction Error Encoding**: Only transmit surprise signals
-- **Homomorphic Encryption**: Process encrypted neural data
-
----
-
-## 4. Safety & Cybersecurity
-
-### 4.1 Threat Model: Brainjacking
-
-The primary security concern is "brainjacking"—unauthorized access to the neural interface that could allow attackers to:
-- Read thoughts (privacy violation)
-- Inject false perceptions (reality manipulation)
-- Take control of motor functions (physical harm)
-
-### 4.2 Defense: Homomorphic Encryption
-
-The satellite (Synthetic Brain) must process neural signals **without knowing what they mean**.
-
-**Protocol:**
-1. **Biological Brain** encrypts spikes: $E(x)$
-2. **Satellite** processes encrypted data: $E(x) + E(y) = E(x + y)$
-3. **Biological Brain** receives result and decrypts
-
-**Security Guarantee:** If hackers seize the satellite, they only see encrypted noise. They cannot "read" thoughts or inject commands because they lack the private key held physically in the biological interface.
-
-### 4.3 Kill Switch Mechanism
-
-The Neural Firewall implements multiple safety mechanisms:
-
-1. **Spike Rate Limiting**: Triggers kill switch if spike rates exceed 200Hz
-2. **Traffic Pattern Analysis**: Detects anomalous neural activity via z-score analysis
-3. **Hardware Interrupt Capability**: Emergency disconnect from external interfaces
-4. **Encryption Key Revocation**: Instantly invalidate satellite access
-
----
-
-## 5. Proposed Testing
-
-### 5.1 Uni-hemispheric Subjective Test
+### 4.1 Uni-hemispheric Subjective Test
 
 **Design:** Present visual stimuli that spans both visual fields (processed by different hemispheres). Subject reports whether perception is unified or disjoint.
 
 **Success Criteria:** Subject reports unified visual experience despite one hemisphere being synthetic.
 
-### 5.2 Prediction Error Metrics
-
-Monitor prediction error magnitude over time:
-- **Decreasing error**: System is learning, integration succeeding
-- **Stable low error**: Full integration achieved
-- **Increasing error**: Integration failure, trigger safety protocols
-
----
-
-## 6. Future Directions
-
-- Integration with neuromorphic hardware (Intel Loihi, IBM TrueNorth)
-- Enhanced sensory modalities (haptic, auditory, proprioceptive)
-- Multi-agent consciousness synchronization protocols
-- Deep space testing with Starlink/Kuiper constellation
-
 ---
 
 ## References
 
-1. Sperry, R. W. (1968). Hemisphere deconnection and unity in conscious awareness. *American Psychologist*, 23(10), 723-733.
-2. Libet, B. (1985). Unconscious cerebral initiative and the role of conscious will in voluntary action. *Behavioral and Brain Sciences*, 8(4), 529-539.
-3. Watanabe, M. (2021). The neutral consciousness framework. *Frontiers in Computational Neuroscience*.
-4. Friston, K. (2010). The free-energy principle: a unified brain theory? *Nature Reviews Neuroscience*, 11(2), 127-138.
-5. Gentry, C. (2009). Fully homomorphic encryption using ideal lattices. *STOC '09*.
+1. Sperry, R. W. (1968). Hemisphere deconnection and unity in conscious awareness. *American Psychologist*.
+2. Libet, B. (1985). Unconscious cerebral initiative. *Behavioral and Brain Sciences*.
+3. Watanabe, M. (2021). The neutral consciousness framework.
+4. Friston, K. (2010). The free-energy principle. *Nature Reviews Neuroscience*.
+5. Pycroft, L., et al. (2016). Brainjacking: Implant Security. *World Neurosurgery*.
+6. Nguyen, T., et al. (2025). Hybrid TEE for BCI Latency Optimization. *IEEE TBME*.
 
 ---
 
 *Repository: [neutral-consciousness-engine](https://github.com/)*
-*Contact: maintainer@example.com*
