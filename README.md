@@ -4,10 +4,10 @@ This repository implements the **"Generative Model"** described in the *Medical 
 
 ## Core Architecture
 
-*   **The Brain:** A Spiking Neural Network (SNN) built with Nengo/ROS 2.
-*   **The Body:** A physics-compliant avatar in Unity 6.
-*   **The Bridge:** A low-latency TCP handshake simulating the Corpus Callosum interface.
-*   **The Guardian:** A Neural Firewall to prevent "Brainjacking" during transfer.
+*   **The Brain (Generative Model):** A Spiking Neural Network (SNN) built with Nengo/ROS 2. Unlike traditional AI, it implements **Predictive Coding**: the cortex predicts sensory input and only transmits the *prediction error* (Error = Input - Prediction), minimizing bandwidth for OISL compatibility.
+*   **The Body (Digital Twin):** A physics-compliant avatar in Unity 6, serving as the somatosensory anchor.
+*   **The Bridge (Corpus Callosum):** A low-latency TCP handshake simulating the biological interface.
+*   **The Guardian (Neural Firewall):** A **Hybrid TEE** (Trusted Execution Environment) middleware. It combines AES-256 for real-time streams with Homomorphic Encryption for identity handshakes. It includes active "Brainjacking" defenses that monitor for malicious stimulation patterns (e.g., high-frequency seizure induction).
 
 ## Directory Structure
 
