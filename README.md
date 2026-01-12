@@ -40,18 +40,31 @@ neutral-consciousness-engine/
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/neutral-consciousness-engine.git
+   git clone https://github.com/venturaEffect/neutral-consciousness-engine.git
    cd neutral-consciousness-engine
    ```
 
-2. Build the ROS 2 workspace:
+2. Install Python dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Clone the ROS-TCP-Endpoint (Unity-ROS Bridge):
+   ```bash
+   cd ros2_ws/src
+   git clone https://github.com/Unity-Technologies/ROS-TCP-Endpoint.git
+   cd ../..
+   ```
+
+4. Build the ROS 2 workspace:
    ```bash
    cd ros2_ws
    colcon build
-   source install/setup.bash
+   source install/setup.bash  # Linux/Mac
+   # or: call install/setup.bat  # Windows
    ```
 
-3. Install Unity ROS Hub:
+5. Install Unity ROS Hub:
    - Open Unity Package Manager
    - Add package from git URL: `https://github.com/Unity-Technologies/ROS-TCP-Connector.git?path=/com.unity.robotics.ros-tcp-connector`
 

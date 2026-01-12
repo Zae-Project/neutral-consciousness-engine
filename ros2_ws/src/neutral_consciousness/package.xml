@@ -3,15 +3,21 @@
 <package format="3">
   <name>neutral_consciousness</name>
   <version>0.1.0</version>
-  <description>The Neutral Consciousness Engine - SNN-based Generative Model</description>
-  <maintainer email="maintainer@example.com">Neutral Consciousness Team</maintainer>
+  <description>The Neutral Consciousness Engine - SNN-based Generative Model for the Watanabe Transfer Protocol</description>
+  <maintainer email="info@theconsciousness.ai">Neutral Consciousness Team</maintainer>
   <license>MIT</license>
+  
+  <url type="website">https://theconsciousness.ai</url>
+  <url type="repository">https://github.com/venturaEffect/neutral-consciousness-engine</url>
 
+  <!-- ROS 2 Core Dependencies -->
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>geometry_msgs</depend>
+  <depend>std_srvs</depend>
 
+  <!-- Test Dependencies -->
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>

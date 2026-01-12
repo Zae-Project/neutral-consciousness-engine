@@ -1,0 +1,47 @@
+# Neutral Consciousness Engine - Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# =============================================================================
+# Core Dependencies (Required)
+# =============================================================================
+
+# Neuromorphic Computing - Spiking Neural Networks
+nengo>=3.0.0
+
+# Numerical Computing
+numpy>=1.21.0
+
+# =============================================================================
+# Optional Dependencies
+# =============================================================================
+
+# Homomorphic Encryption (for real HE instead of stub)
+# Uncomment to enable TenSEAL-based encryption
+# tenseal>=0.3.0
+
+# GPU Acceleration for Nengo (optional)
+# nengo-dl>=3.4.0
+# tensorflow>=2.8.0
+
+# =============================================================================
+# ROS 2 Dependencies (installed via rosdep, not pip)
+# =============================================================================
+# The following are ROS 2 packages - install via:
+#   rosdep install --from-paths ros2_ws/src --ignore-src -r -y
+#
+# - rclpy
+# - std_msgs
+# - sensor_msgs
+# - geometry_msgs
+# - std_srvs
+
+# =============================================================================
+# Development Dependencies (optional)
+# =============================================================================
+
+# Testing
+pytest>=7.0.0
+
+# Code formatting
+# black>=22.0.0
+# flake8>=4.0.0

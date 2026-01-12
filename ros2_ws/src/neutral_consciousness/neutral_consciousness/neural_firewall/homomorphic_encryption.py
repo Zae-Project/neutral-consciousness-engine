@@ -281,3 +281,224 @@ def demo_homomorphic_processing():
 
 if __name__ == '__main__':
     demo_homomorphic_processing()
+
+
+# =============================================================================
+# ROS 2 Node Wrapper for Homomorphic Encryption
+# =============================================================================
+
+try:
+    import rclpy
+    from rclpy.node import Node
+    from std_msgs.msg import Float32MultiArray, String
+    ROS_AVAILABLE = True
+except ImportError:
+    ROS_AVAILABLE = False
+
+
+class HomomorphicEncryptionNode:
+    """
+    ROS 2 Node for real-time homomorphic encryption of neural streams.
+    
+    This node sits between the biological interface and the satellite uplink,
+    encrypting outgoing data and decrypting incoming responses.
+    
+    Topics:
+        Subscribed:
+            - /neural_stream/outgoing: Raw neural data to encrypt for satellite
+            - /satellite_downlink/encrypted: Encrypted responses from satellite
+        
+        Published:
+            - /satellite_uplink/encrypted: Encrypted neural data for satellite
+            - /neural_stream/decrypted: Decrypted responses for biological interface
+            - /encryption/status: Encryption system status and metrics
+    """
+    
+    def __new__(cls, *args, **kwargs):
+        if not ROS_AVAILABLE:
+            raise RuntimeError("ROS 2 (rclpy) not available. Cannot create HE node.")
+        return super().__new__(cls)
+    
+    def __init__(self):
+        # Initialize as ROS node
+        self._node = _HomomorphicEncryptionNodeImpl()
+    
+    def spin(self):
+        """Run the node."""
+        rclpy.spin(self._node)
+    
+    def destroy(self):
+        """Cleanup."""
+        self._node.destroy_node()
+
+
+if ROS_AVAILABLE:
+    class _HomomorphicEncryptionNodeImpl(Node):
+        """Internal ROS 2 node implementation."""
+        
+        def __init__(self):
+            super().__init__('homomorphic_encryption_node')
+            
+            # Initialize encryption wrapper
+            self.encryption_wrapper = NeuralEncryptionWrapper()
+            self._encrypted_cache = {}  # Cache for matching responses
+            
+            # Declare parameters
+            self.declare_parameter('encryption_enabled', True)
+            self.declare_parameter('log_metrics', True)
+            
+            self.encryption_enabled = self.get_parameter('encryption_enabled').value
+            self.log_metrics = self.get_parameter('log_metrics').value
+            
+            # Metrics
+            self._packets_encrypted = 0
+            self._packets_decrypted = 0
+            
+            # Publishers
+            self.encrypted_pub = self.create_publisher(
+                Float32MultiArray,
+                '/satellite_uplink/encrypted',
+                10
+            )
+            
+            self.decrypted_pub = self.create_publisher(
+                Float32MultiArray,
+                '/neural_stream/decrypted',
+                10
+            )
+            
+            self.status_pub = self.create_publisher(
+                String,
+                '/encryption/status',
+                10
+            )
+            
+            # Subscribers
+            self.outgoing_sub = self.create_subscription(
+                Float32MultiArray,
+                '/neural_stream/outgoing',
+                self.encrypt_outgoing,
+                10
+            )
+            
+            self.incoming_sub = self.create_subscription(
+                Float32MultiArray,
+                '/satellite_downlink/encrypted',
+                self.decrypt_incoming,
+                10
+            )
+            
+            # Status timer
+            self.status_timer = self.create_timer(5.0, self.publish_status)
+            
+            mode = "TenSEAL CKKS" if TENSEAL_AVAILABLE else "STUB (Demo)"
+            self.get_logger().info(
+                f"Homomorphic Encryption Node initialized. Mode: {mode}"
+            )
+        
+        def encrypt_outgoing(self, msg: Float32MultiArray):
+            """
+            Encrypt outgoing neural data for satellite transmission.
+            
+            The satellite will process this encrypted data without
+            being able to read the actual neural signals.
+            """
+            if not self.encryption_enabled:
+                # Pass-through mode
+                self.encrypted_pub.publish(msg)
+                return
+            
+            try:
+                data = np.array(msg.data, dtype=np.float32)
+                encrypted, metadata = self.encryption_wrapper.encrypt_spike_train(data)
+                
+                # Store for later decryption matching
+                packet_id = metadata['packet_id']
+                self._encrypted_cache[packet_id] = {
+                    'encrypted': encrypted,
+                    'metadata': metadata
+                }
+                
+                # For ROS transmission, we send the encrypted data as floats
+                # In real implementation, this would be serialized ciphertext
+                enc_msg = Float32MultiArray()
+                if encrypted.is_real:
+                    # TenSEAL: serialize would go here
+                    enc_msg.data = [float(packet_id)]  # Placeholder
+                else:
+                    # Stub mode: send the "encrypted" integers as floats
+                    enc_msg.data = encrypted.data.astype(np.float32).tolist()
+                
+                self.encrypted_pub.publish(enc_msg)
+                self._packets_encrypted += 1
+                
+            except Exception as e:
+                self.get_logger().error(f"Encryption failed: {e}")
+        
+        def decrypt_incoming(self, msg: Float32MultiArray):
+            """
+            Decrypt incoming satellite response.
+            
+            Only the biological interface (this node) can decrypt,
+            as it holds the private key.
+            """
+            if not self.encryption_enabled:
+                self.decrypted_pub.publish(msg)
+                return
+            
+            try:
+                # In real implementation, deserialize and decrypt
+                # For stub mode, we demonstrate the concept
+                data = np.array(msg.data, dtype=np.float32)
+                
+                # Create a mock encrypted vector for demonstration
+                enc_vec = EncryptedVector(
+                    data.astype(np.int64),
+                    is_real=False,
+                    stub_noise=np.zeros_like(data, dtype=np.int64)
+                )
+                
+                decrypted = self.encryption_wrapper.context.decrypt(enc_vec)
+                
+                dec_msg = Float32MultiArray()
+                dec_msg.data = decrypted.tolist()
+                self.decrypted_pub.publish(dec_msg)
+                self._packets_decrypted += 1
+                
+            except Exception as e:
+                self.get_logger().error(f"Decryption failed: {e}")
+        
+        def publish_status(self):
+            """Publish encryption system status."""
+            if not self.log_metrics:
+                return
+            
+            mode = "TenSEAL" if TENSEAL_AVAILABLE else "STUB"
+            status = (
+                f"HE Status | Mode: {mode} | "
+                f"Encrypted: {self._packets_encrypted} | "
+                f"Decrypted: {self._packets_decrypted}"
+            )
+            
+            status_msg = String()
+            status_msg.data = status
+            self.status_pub.publish(status_msg)
+
+
+def main(args=None):
+    """ROS 2 node entry point."""
+    if not ROS_AVAILABLE:
+        print("ROS 2 not available. Running demo instead.")
+        demo_homomorphic_processing()
+        return
+    
+    rclpy.init(args=args)
+    node = _HomomorphicEncryptionNodeImpl()
+    
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
