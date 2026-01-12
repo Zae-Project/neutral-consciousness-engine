@@ -6,11 +6,15 @@ Launches the complete "Mind" system:
 2. Visual Cortex SNN (Predictive Coding)
 3. Dream Engine (Generative Model)
 4. Neural Firewall (Brainjacking Defense)
-5. Latency Injector (OISL Simulation)
-6. Split Brain Test (Hemispheric Protocol)
+5. Homomorphic Encryption Node (Satellite Security)
+6. Latency Injector (OISL Simulation)
+7. Split Brain Test (Hemispheric Protocol)
 
 Usage:
     ros2 launch neutral_consciousness master_system.launch.py
+
+    # With custom parameters:
+    ros2 launch neutral_consciousness master_system.launch.py round_trip_time_ms:=50.0 dream_mode:=true encryption_enabled:=true
 
 Prerequisites:
     - Clone ROS-TCP-Endpoint: https://github.com/Unity-Technologies/ROS-TCP-Endpoint
@@ -36,10 +40,17 @@ def generate_launch_description():
         default_value='false',
         description='Start Dream Engine in dream mode (free-running generation)'
     )
+    
+    encryption_arg = DeclareLaunchArgument(
+        'encryption_enabled',
+        default_value='true',
+        description='Enable homomorphic encryption for satellite communication'
+    )
 
     return LaunchDescription([
         rtt_arg,
         dream_mode_arg,
+        encryption_arg,
         
         # ============================================================
         # 1. ROS-TCP Endpoint (Bridge to Unity)
@@ -97,7 +108,24 @@ def generate_launch_description():
         ),
 
         # ============================================================
-        # 5. Latency Injector (OISL Delay Simulation)
+        # 5. Homomorphic Encryption Node (Satellite Security)
+        # Receives: /neural_stream/outgoing, /satellite_downlink/encrypted
+        # Publishes: /satellite_uplink/encrypted, /neural_stream/decrypted
+        # Ensures satellite cannot read neural data (CKKS scheme)
+        # ============================================================
+        Node(
+            package='neutral_consciousness',
+            executable='he_node',
+            name='homomorphic_encryption',
+            parameters=[
+                {'encryption_enabled': LaunchConfiguration('encryption_enabled')},
+                {'log_metrics': True}
+            ],
+            output='screen'
+        ),
+
+        # ============================================================
+        # 6. Latency Injector (OISL Delay Simulation)
         # Receives: /neural_stream/generated
         # Publishes: /neural_stream/delayed
         # Validates against Libet's 500ms limit
@@ -113,7 +141,7 @@ def generate_launch_description():
         ),
 
         # ============================================================
-        # 6. Split Brain Test (Uni-hemispheric Subjective Protocol)
+        # 7. Split Brain Test (Uni-hemispheric Subjective Protocol)
         # Receives: /camera/left_eye, /camera/right_eye, /synchronization_health
         # Publishes: /conscious_output/unified_field
         # Service: /trigger_hemispheric_switch
@@ -126,7 +154,7 @@ def generate_launch_description():
         ),
 
         # ============================================================
-        # 7. (Optional) Auto-launch Unity Build if available
+        # 8. (Optional) Auto-launch Unity Build if available
         # Uncomment and adjust path for your platform
         # ============================================================
         # ExecuteProcess(

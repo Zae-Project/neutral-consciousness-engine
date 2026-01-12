@@ -97,4 +97,4 @@ To validate space-travel capabilities, the computation of the Synthetic Hemisphe
 
 ---
 
-*Repository: [neutral-consciousness-engine](https://github.com/)*
+*Repository: [neutral-consciousness-engine](https://github.com/venturaEffect/neutral-consciousness-engine)*
