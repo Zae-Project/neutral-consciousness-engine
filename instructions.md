@@ -61,12 +61,10 @@ neutral-consciousness-engine/
 
 ### **3. Essential Configuration Files**
 
-Provide these snippets to the Copilot so the system works immediately after cloning.
-
 #### **A. The Combined `.gitignore`**
 *Merging Unity and Python/ROS build artifacts is critical to avoid a messy repo.*
 
-**Prompt:** "Create a root `.gitignore` file that merges standard Unity, Python, and ROS 2 exclusions."
+**Task:** "Create a root `.gitignore` file that merges standard Unity, Python, and ROS 2 exclusions."
 
 ```gitignore
 # --- ROS 2 ---
@@ -107,7 +105,7 @@ env/
 #### **B. The Master Launch File (`master_system.launch.py`)**
 *This script allows you to start the entire "Consciousness" with one command.*
 
-**Prompt:** "Generate the `ros2_ws/src/neutral_consciousness/launch/master_system.launch.py` file using `ExecuteProcess` to start the Unity executable and `Node` to start the SNN."
+**Task:** "Generate the `ros2_ws/src/neutral_consciousness/launch/master_system.launch.py` file using `ExecuteProcess` to start the Unity executable and `Node` to start the SNN."
 
 ```python
 from launch import LaunchDescription
@@ -142,7 +140,7 @@ def generate_launch_description():
 #### **C. The Neural Firewall Stub (`traffic_monitor.py`)**
 *This is the cybersecurity component you requested.*
 
-**Prompt:** "Create a basic `traffic_monitor.py` for the Neural Firewall module that monitors spike rates."
+**Task:** "Create a basic `traffic_monitor.py` for the Neural Firewall module that monitors spike rates."
 
 ```python
 import rclpy
@@ -178,7 +176,7 @@ class NeuralFirewall(Node):
 
 ### **4. Next Steps for You**
 
-1.  **Initialize the Repo:** Run these commands (or ask Copilot to do it):
+1.  **Initialize the Repo:** Run these commands:
     ```bash
     mkdir neutral-consciousness-engine
     cd neutral-consciousness-engine
