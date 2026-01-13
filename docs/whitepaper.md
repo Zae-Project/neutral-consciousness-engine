@@ -24,7 +24,7 @@ The Neutral Consciousness Engine represents a novel approach to consciousness si
 
 ### 1.1 The Problem of Consciousness Transfer
 
-Traditional approaches to consciousness preservation face a fundamental issue: the "teleporter problem." If we copy neural patterns to a new substrate, we create a duplicate rather than transferring the original consciousness. The subjective locus—the "I" that experiences reality—remains in the biological brain until death.
+Traditional approaches to consciousness preservation face a fundamental issue: the "teleporter problem." If we copy neural patterns to a new substrate, we create a duplicate rather than transferring the original consciousness. The subjective locus, the "I" that experiences reality, remains in the biological brain until death.
 
 ---
 
@@ -82,7 +82,7 @@ Once synchronization is confirmed, a reversible pharmacological agent (e.g., pro
 The hypothesis predicts that the subject will report a unified visual field. Specifically, if an object passes across the vertical meridian from the biological side (left visual field) to the synthetic side (right visual field), the subject should experience continuous motion without temporal disjoint. A report of "blindsight" (acting on the object without seeing it) would falsify the hypothesis.
 
 ### Stage 4: Orbital Migration (The Libet Limit)
-To validate space-travel capabilities, the computation of the Synthetic Hemisphere is migrated from the local edge node to a LEO satellite via Optical Inter-Satellite Link (OISL). We predict that as long as the total Round-Trip Latency (RTL) remains under 200ms—well within the 500ms "time-to-consciousness" delay identified by Libet—the subject will perceive no disruption in the continuity of the "Now."
+To validate space-travel capabilities, the computation of the Synthetic Hemisphere is migrated from the local edge node to a LEO satellite via Optical Inter-Satellite Link (OISL). We predict that as long as the total Round-Trip Latency (RTL) remains under 200ms, well within the 500ms "time-to-consciousness" delay identified by Libet, the subject will perceive no disruption in the continuity of the "Now."
 
 ---
 
