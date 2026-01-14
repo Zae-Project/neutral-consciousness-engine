@@ -79,6 +79,25 @@ ros2 launch neutral_consciousness master_system.launch.py
 
 See the [docs/whitepaper.md](docs/whitepaper.md) for the full Medical Hypotheses logic.
 
+## Research Resources
+
+For comprehensive research materials supporting this project, see the **[Zae Project Bibliography](https://github.com/Zae-Project/zae-docs/blob/main/reference/bibliography.md)** - a centralized repository containing:
+
+- **100+ Key Researchers** - Leading scientists in consciousness studies, SNNs, neuromorphic computing, and WBE
+- **50+ Foundational Papers** - Seminal publications with full citations
+- **35+ Essential Books** - Organized by topic with reading recommendations
+- **Research Institutions & Labs** - Major centers advancing consciousness research
+- **Conference & Journal Directory** - Community engagement opportunities
+
+**Relevant Sections for Neutral Consciousness Engine:**
+- Consciousness Studies (Chalmers, Nagel, Koch, Tononi, Dehaene, Seth)
+- Neuromorphic Computing (Mead, Boahen, Eliasmith, Furber)
+- Computational Neuroscience (Sejnowski, Gerstner, Izhikevich)
+- Whole Brain Emulation (Sandberg, Bostrom, Koene, Hayworth)
+- Information Theory (Shannon, Kurzweil, Tegmark, Aaronson)
+
+Also see the **[Researchers Directory](https://github.com/Zae-Project/zae-docs/blob/main/reference/researchers-directory.md)** for detailed profiles and contact information.
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
