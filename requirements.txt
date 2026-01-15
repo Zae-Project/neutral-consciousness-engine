@@ -1,4 +1,7 @@
 # Neutral Consciousness Engine - Python Dependencies
+# ==================================================
+# ROS 2 Humble compatible packages
+# Last Updated: January 15, 2026
 # Install with: pip install -r requirements.txt
 
 # =============================================================================
@@ -6,22 +9,43 @@
 # =============================================================================
 
 # Neuromorphic Computing - Spiking Neural Networks
-nengo>=3.0.0
+nengo>=3.2.0           # Neural Engineering Framework for predictive coding
 
-# Numerical Computing
+# Scientific Computing
 numpy>=1.21.0
+scipy>=1.7.0
+
+# Computer Vision (for Unity camera feed processing)
+opencv-python>=4.5.0
+Pillow>=9.0.0
+
+# Cryptography for Neural Firewall
+cryptography>=3.4.8   # AES-256 encryption
+
+# Data Serialization
+protobuf>=3.19.0
+
+# Configuration
+pyyaml>=5.4.0
 
 # =============================================================================
-# Optional Dependencies
+# Optional / Future Dependencies
 # =============================================================================
 
-# Homomorphic Encryption (for real HE instead of stub)
-# Uncomment to enable TenSEAL-based encryption
-# tenseal>=0.3.0
+# Homomorphic Encryption (Future - currently using mock)
+# tenseal>=0.3.0        # CKKS scheme for identity handshake
 
-# GPU Acceleration for Nengo (optional)
-# nengo-dl>=3.4.0
-# tensorflow>=2.8.0
+# GPU Acceleration for Nengo
+# nengo-dl>=3.6.0
+# tensorflow>=2.10.0
+
+# Alternative SNN Framework (Future)
+# torch>=1.12.0
+# bindsnet>=0.2.8
+
+# Data Analysis & Visualization
+# pandas>=1.3.0
+# matplotlib>=3.5.0
 
 # =============================================================================
 # ROS 2 Dependencies (installed via rosdep, not pip)
@@ -36,12 +60,20 @@ numpy>=1.21.0
 # - std_srvs
 
 # =============================================================================
-# Development Dependencies (optional)
+# Development Dependencies (Optional)
 # =============================================================================
 
 # Testing
 pytest>=7.0.0
+pytest-cov>=3.0.0
 
-# Code formatting
-# black>=22.0.0
-# flake8>=4.0.0
+# Code Quality
+black>=22.0.0         # Code formatting
+flake8>=4.0.0         # Linting
+
+# =============================================================================
+# Platform-Specific Notes
+# =============================================================================
+# Windows: Ensure Visual C++ 14.0 or greater is installed
+# ROS 2: Install via https://docs.ros.org/en/humble/Installation/Windows-Install-Binary.html
+# Python: 3.10+ recommended

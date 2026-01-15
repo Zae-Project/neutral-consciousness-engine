@@ -1,14 +1,30 @@
 """
-Split Brain Test Node
+Split Brain Test Node - Uni-Hemispheric Subjective Protocol
 
-Implements the "Uni-hemispheric Subjective Protocol".
-managed the transition from "Shadow Mode" to full "Hemispheric Transfer".
+Implements the validation protocol for the Watanabe Transfer Protocol,
+directly inspired by:
+
+SCIENTIFIC FOUNDATION:
+- Watanabe, M., et al. (2014). "Interhemispheric transfer of visual 
+  information in split-brain patients." Neuropsychologia, 63, 133-142.
+- Sperry, R.W. (1968). "Hemisphere deconnection and unity in conscious 
+  awareness." American Psychologist, 23(10), 723-733.
+
+NOTE: This is NOT the official work of Professor Masataka Watanabe.  
+We are independent researchers implementing a test protocol inspired by
+his hemisphere integration research approach.
+
+TEST PROTOCOL (4 Stages):
+1. Shadow Mode: Synthetic hemisphere learns (output GATED)
+2. The Switch: Pharmacological suppression + ungating
+3. Subjective Report: Unified visual field test
+4. Orbital Migration: Move computation to satellite
 
 Logic:
-- Subscribes to Biological (Left) and Machine (Right) inputs.
-- Shadow Mode: GATES the machine output (learning only).
-- Active Mode: MERGES machine output with biological output.
-- Switch: Only allows transition if sync health > 95%.
+- Subscribes to Biological (Left) and Synthetic (Right) inputs
+- Shadow Mode: GATES machine output (learning only)
+- Active Mode: MERGES machine output with biological output
+- Switch: Only allows transition if sync health > 95%
 """
 
 import rclpy

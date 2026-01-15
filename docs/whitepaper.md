@@ -30,7 +30,21 @@ Traditional approaches to consciousness preservation face a fundamental issue: t
 
 ## 2. Core Principles
 
-### 2.1 The Generative Model (True Predictive Coding)
+### 2.1 Scientific Foundation - Watanabe-Inspired Approach
+
+**IMPORTANT DISCLAIMER:** This project is inspired by and builds upon the research approach 
+of Professor Masataka Watanabe, particularly:
+
+- **Watanabe, M., et al. (2014).** "Interhemispheric transfer of visual information in split-brain patients." 
+  *Neuropsychologia*, 63, 133-142. DOI: 10.1016/j.neuropsychologia.2014.08.025
+
+- **Watanabe's Neutral Consciousness Framework** (referenced in project documentation)
+
+**This is NOT the official work of Professor Watanabe.** We are independent researchers applying 
+principles from his publications to explore consciousness substrate transfer. Any errors, 
+limitations, or speculative elements are entirely our own.
+
+### 2.2 The Generative Model (True Predictive Coding)
 
 The system implements the "Generative Model" of consciousness. Unlike standard neural networks that react to input, our implementation continuously *predicts* incoming sensory data.
 
@@ -40,9 +54,12 @@ The system implements the "Generative Model" of consciousness. Unlike standard n
 - **Error Units:** A specialized population that computes `Error = Input - Prediction`.
 - **Optimization:** The system transmits only the *prediction error* (the "surprise") to the satellite, minimizing bandwidth requirements for the OISL link. This aligns with the Free Energy Principle (Friston, 2010).
 
-### 2.2 The Watanabe Transfer Protocol
+### 2.3 The Watanabe Transfer Protocol (Inspired Framework)
 
-A theoretical framework for interfacing biological neural networks with artificial substrates, ensuring continuity of consciousness during transfer.
+A theoretical framework for interfacing biological neural networks with artificial substrates, 
+ensuring continuity of consciousness during transfer. This framework is **inspired by** 
+Watanabe's hemisphere integration research but represents our own interpretation and 
+application of those principles.
 
 ---
 

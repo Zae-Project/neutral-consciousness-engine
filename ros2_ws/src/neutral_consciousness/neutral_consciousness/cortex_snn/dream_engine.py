@@ -1,11 +1,22 @@
 """
-Dream Engine Module
+Dream Engine Module - Generative Predictive Model
 
-Implements the Generative Model logic - the core of the
-"consciousness generates reality" hypothesis.
+Implements the Generative Model logic inspired by:
+- Watanabe's "neutral consciousness" framework (2021)
+- Friston's Free Energy Principle (2010)
+
+NOTE: This implementation is inspired by Professor Masataka Watanabe's research 
+approach. This is NOT his official work. We are independent researchers exploring
+the "consciousness generates reality" hypothesis.
 
 This module generates internal predictions of sensory experiences,
 comparing them against actual sensory input to minimize prediction error.
+The goal is to create a substrate for consciousness that operates via 
+continuous prediction rather than reactive processing.
+
+RELATED RESEARCH:
+- Friston, K. (2010). Free-energy principle. Nature Reviews Neuroscience.
+- Watanabe, M. (2021). Neutral consciousness framework.
 """
 
 import rclpy

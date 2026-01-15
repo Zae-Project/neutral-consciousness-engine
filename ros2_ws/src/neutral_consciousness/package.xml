@@ -3,19 +3,28 @@
 <package format="3">
   <name>neutral_consciousness</name>
   <version>0.1.0</version>
-  <description>The Neutral Consciousness Engine - SNN-based Generative Model for the Watanabe Transfer Protocol</description>
-  <maintainer email="info@theconsciousness.ai">Neutral Consciousness Team</maintainer>
+  <description>
+    The Neutral Consciousness Engine - SNN-based Generative Model inspired by the 
+    Watanabe Transfer Protocol approach. IMPORTANT: This is NOT the official work of 
+    Professor Masataka Watanabe. We are independent researchers applying principles 
+    from his publications.
+  </description>
+  <maintainer email="zae@todosloscobardesdelvalle.com">Zae Project Team</maintainer>
   <license>MIT</license>
   
-  <url type="website">https://theconsciousness.ai</url>
-  <url type="repository">https://github.com/venturaEffect/neutral-consciousness-engine</url>
+  <url type="website">https://theconsciousness.ai/core</url>
+  <url type="repository">https://github.com/Zae-Project/neutral-consciousness-engine</url>
+  <url type="bugtracker">https://github.com/Zae-Project/neutral-consciousness-engine/issues</url>
 
-  <!-- ROS 2 Core Dependencies -->
-  <depend>rclpy</depend>
-  <depend>std_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>std_srvs</depend>
+  <!-- Build Dependencies -->
+  <buildtool_depend>ament_python</buildtool_depend>
+  
+  <!-- Runtime Dependencies -->
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
 
   <!-- Test Dependencies -->
   <test_depend>ament_copyright</test_depend>

@@ -1,6 +1,27 @@
 # The Neutral Consciousness Engine
 
-This repository implements the **"Generative Model"** described in the *Medical Hypotheses* submission. It serves as the **"Neutral Consciousness"** substrate required for the **Watanabe Transfer Protocol**.
+**Consciousness Substrate Transfer via Spiking Neural Networks**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![ROS 2 Humble](https://img.shields.io/badge/ROS%202-Humble-blue)](https://docs.ros.org/en/humble/)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
+
+---
+
+## Overview
+
+This repository implements the **"Generative Model"** for the Watanabe Transfer Protocol - a theoretical framework for seamless consciousness substrate transfer. It serves as the **"Neutral Consciousness"** synthetic hemisphere required for hemisphere integration.
+
+**IMPORTANT DISCLAIMER:** This project is **inspired by** and builds upon the research approach of Professor Masataka Watanabe, particularly his work on interhemispheric transfer in split-brain patients. **This is NOT his official work.** We are independent researchers exploring consciousness substrate transfer based on principles from his publications.
+
+### Scientific Foundation
+
+**Key Research References:**
+- **Watanabe, M., et al. (2014).** "Interhemispheric transfer of visual information in split-brain patients." *Neuropsychologia*, 63, 133-142. DOI: 10.1016/j.neuropsychologia.2014.08.025
+- **Watanabe's Neutral Consciousness Framework** (referenced in project documentation)
+- **Sperry, R.W. (1968).** "Hemisphere deconnection and unity in conscious awareness." *American Psychologist*, 23(10), 723-733.
+- **Libet, B. (1983).** Unconscious cerebral initiative. *Behavioral and Brain Sciences*.
+- **Friston, K. (2010).** The free-energy principle. *Nature Reviews Neuroscience*.
 
 ## Core Architecture
 

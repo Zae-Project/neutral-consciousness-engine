@@ -1,13 +1,22 @@
 """
-Latency Injector - Neural Firewall
+Latency Injector - OISL Delay Simulation for Watanabe Transfer Protocol
 
 Simulates the OISL (Optical Inter-Satellite Link) delay to validate
 Orbital Migration capability within the Libet Limit.
 
+SCIENTIFIC BASIS:
+- Libet, B. (1983). ~350ms lag between neural events and conscious awareness
+- Libet Limit: 500ms (consciousness continuity threshold)
+- OISL Target: <50ms RTT (well within Libet buffer)
+
+NOTE: This implements concepts inspired by Watanabe's hemisphere integration
+research. This is NOT official work of Professor Watanabe.
+
 Logic:
-- Intercepts neural data.
-- Holds it in a queue for `round_trip_time_ms`.
-- Checks against Libet's Limit (500ms).
+- Intercepts neural data from SNN
+- Holds it in a queue for configurable round_trip_time_ms
+- Validates against Libet's 500ms limit
+- Triggers fatal error if consciousness continuity would break
 """
 
 import rclpy
