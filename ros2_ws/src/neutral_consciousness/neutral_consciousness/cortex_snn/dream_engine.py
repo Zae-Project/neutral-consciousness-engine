@@ -42,41 +42,71 @@ class DreamEngine(Node):
     
     def __init__(self):
         super().__init__('dream_engine')
-        
+
+        # Dimensions
+        self.SEMANTIC_DIM = 512  # High-dimensional semantic pointers
+        self.VISUAL_DIM = 64     # Low-dimensional visual features
+
         # Configuration
         self.declare_parameter('prediction_rate_hz', 30.0)
         self.declare_parameter('dream_mode', False)
-        
+        self.declare_parameter('tau_slow', 100.0)  # Slow dynamics timescale (ms)
+
         self.prediction_rate = self.get_parameter('prediction_rate_hz').value
-        self.dream_mode = self.get_parameter('dream_mode').value
-        
-        # Internal state
-        self.current_prediction = np.zeros(64, dtype=np.float32)
-        self.prediction_error = np.zeros(64, dtype=np.float32)
-        self.internal_model = np.random.randn(64, 64).astype(np.float32) * 0.1
-        
+
+        # State (injected via Nengo Nodes)
+        self.cortex_activity = np.zeros(self.VISUAL_DIM, dtype=np.float32)
+        self.prediction_error_feedback = np.zeros(self.VISUAL_DIM, dtype=np.float32)
+
+        # Build Nengo SNN model
+        if NENGO_AVAILABLE:
+            self.build_nengo_model()
+            self.sim = nengo.Simulator(self.model, dt=0.001)
+            self.get_logger().info("Dream Engine SPA initialized (10,000 neurons)")
+        else:
+            self.get_logger().warn("Nengo unavailable. Dream Engine will not run.")
+
         # Subscribers
-        self.sensory_input_sub = self.create_subscription(
+        self.cortex_input_sub = self.create_subscription(
             Float32MultiArray,
-            'cortex/visual/activity',
-            self.sensory_input_callback,
+            '/neural_data/cortex_activity',  # Updated from 'cortex/visual/activity'
+            self.cortex_activity_callback,  # Renamed from sensory_input_callback
             10
         )
-        
+
+        self.error_feedback_sub = self.create_subscription(
+            Float32MultiArray,
+            '/neural_data/prediction_error',  # NEW: Receive error from visual cortex
+            self.error_feedback_callback,
+            10
+        )
+
         self.dream_mode_sub = self.create_subscription(
             Bool,
             'dream/enable',
             self.dream_mode_callback,
             10
         )
-        
+
         # Publishers
+        self.topdown_pub = self.create_publisher(
+            Float32MultiArray,
+            'dream/top_down_prediction',  # NEW: Top-down predictions to cortex
+            10
+        )
+
+        self.semantic_pub = self.create_publisher(
+            Float32MultiArray,
+            'dream/semantic_state',  # NEW: Semantic state monitoring
+            10
+        )
+
         self.prediction_pub = self.create_publisher(
             Float32MultiArray,
             'dream/prediction',
             10
         )
-        
+
         self.error_pub = self.create_publisher(
             Float32MultiArray,
             'dream/prediction_error',
@@ -90,72 +120,214 @@ class DreamEngine(Node):
         )
         
         self.get_logger().info('Dream Engine initialized - Generative Model active')
-    
-    def sensory_input_callback(self, msg: Float32MultiArray):
+
+    def build_nengo_model(self):
         """
-        Receive actual sensory data and compute prediction error.
-        
+        Build the Semantic Pointer Architecture (SPA) network.
+
+        Architecture:
+        - Compression: 64D visual → 512D semantic (2000 neurons, fast)
+        - Semantic State: 512D with slow dynamics (5000 neurons, tau_rc=100ms)
+        - Clean-up Memory: Stabilizes semantic pointers (1000 neurons)
+        - Decompression: 512D semantic → 64D visual prediction (2000 neurons, fast)
+        Total: 10,000 neurons
+        """
+        self.model = nengo.Network(label="Dream Engine SPA")
+
+        with self.model:
+            # ============================================================
+            # INPUT NODES (ROS2 → Nengo)
+            # ============================================================
+
+            cortex_input = nengo.Node(output=lambda t: self.cortex_activity)
+            error_input = nengo.Node(output=lambda t: self.prediction_error_feedback)
+
+            # ============================================================
+            # COMPRESSION LAYER: 64D → 512D (Fast dynamics)
+            # ============================================================
+
+            self.encoder = nengo.Ensemble(
+                n_neurons=2000,
+                dimensions=self.VISUAL_DIM,
+                neuron_type=nengo.LIF(tau_rc=0.02),  # Fast (20ms)
+                label="Encoder"
+            )
+            nengo.Connection(cortex_input, self.encoder)
+
+            # ============================================================
+            # SEMANTIC STATE: 512D with SLOW dynamics
+            # ============================================================
+
+            tau_slow = self.get_parameter('tau_slow').value / 1000.0  # ms → seconds
+            self.semantic_state = nengo.Ensemble(
+                n_neurons=5000,
+                dimensions=self.SEMANTIC_DIM,
+                neuron_type=nengo.LIF(tau_rc=tau_slow),  # SLOW (100ms default)
+                radius=1.5,  # Allow for combined semantic pointers
+                label="Semantic State"
+            )
+
+            # Learned compression transform: 64D → 512D
+            self.compression = nengo.Connection(
+                self.encoder,
+                self.semantic_state,
+                transform=np.random.randn(self.SEMANTIC_DIM, self.VISUAL_DIM) * 0.1,
+                learning_rule_type=nengo.PES(learning_rate=1e-4)
+            )
+
+            # Recurrent connection for temporal integration (narrative continuity)
+            nengo.Connection(
+                self.semantic_state,
+                self.semantic_state,
+                synapse=0.1,  # 100ms integration window
+                transform=0.7  # Decay factor
+            )
+
+            # ============================================================
+            # CLEAN-UP MEMORY: Stabilizes semantic pointers
+            # ============================================================
+
+            self.cleanup = nengo.Ensemble(
+                n_neurons=1000,
+                dimensions=self.SEMANTIC_DIM,
+                neuron_type=nengo.LIF(tau_rc=0.02),  # Fast cleanup
+                label="Clean-up Memory"
+            )
+
+            # Bidirectional connection for stabilization
+            nengo.Connection(self.semantic_state, self.cleanup, synapse=0.01)
+            nengo.Connection(self.cleanup, self.semantic_state, transform=0.3, synapse=0.05)
+
+            # ============================================================
+            # DECOMPRESSION LAYER: 512D → 64D (Fast output)
+            # ============================================================
+
+            self.decoder = nengo.Ensemble(
+                n_neurons=2000,
+                dimensions=self.VISUAL_DIM,
+                neuron_type=nengo.LIF(tau_rc=0.02),  # Fast (20ms)
+                label="Decoder"
+            )
+
+            # Learned decompression transform: 512D → 64D
+            self.decompression = nengo.Connection(
+                self.semantic_state,
+                self.decoder,
+                transform=np.random.randn(self.VISUAL_DIM, self.SEMANTIC_DIM) * 0.1,
+                learning_rule_type=nengo.PES(learning_rate=1e-4)
+            )
+
+            # ============================================================
+            # DREAM MODE: Noise injection for free-running generation
+            # ============================================================
+
+            def dream_noise_func(t):
+                """Inject noise when in dream mode"""
+                if self.get_parameter('dream_mode').value:
+                    return np.random.randn(self.SEMANTIC_DIM) * 0.1
+                else:
+                    return np.zeros(self.SEMANTIC_DIM)
+
+            dream_noise = nengo.Node(output=dream_noise_func)
+            nengo.Connection(dream_noise, self.semantic_state, synapse=0.01)
+
+            # ============================================================
+            # ERROR ENSEMBLE: Drives learning
+            # ============================================================
+
+            self.error_ensemble = nengo.Ensemble(
+                n_neurons=500,
+                dimensions=self.VISUAL_DIM,
+                label="Error Ensemble"
+            )
+            nengo.Connection(error_input, self.error_ensemble)
+
+            # Error drives learning in both directions
+            nengo.Connection(
+                self.error_ensemble,
+                self.compression.learning_rule,
+                transform=-1,  # Minimize error
+                synapse=0.01
+            )
+            nengo.Connection(
+                self.error_ensemble,
+                self.decompression.learning_rule,
+                transform=-1,
+                synapse=0.01
+            )
+
+            # ============================================================
+            # OUTPUT NODES (Nengo → ROS2)
+            # ============================================================
+
+            # Top-down prediction to visual cortex
+            topdown_output = nengo.Node(
+                input=self.publish_topdown,
+                size_in=self.VISUAL_DIM
+            )
+            nengo.Connection(self.decoder, topdown_output, synapse=0.01)
+
+            # Semantic state monitoring
+            semantic_output = nengo.Node(
+                input=self.publish_semantic,
+                size_in=self.SEMANTIC_DIM
+            )
+            nengo.Connection(self.semantic_state, semantic_output, synapse=0.01)
+
+            # ============================================================
+            # PROBES (for debugging and monitoring)
+            # ============================================================
+
+            self.semantic_probe = nengo.Probe(self.semantic_state, synapse=0.01)
+            self.prediction_probe = nengo.Probe(self.decoder, synapse=0.01)
+
+    def publish_topdown(self, t, x):
+        """Callback to publish top-down predictions from Nengo to ROS2."""
+        msg = Float32MultiArray()
+        msg.data = x.tolist()
+        self.topdown_pub.publish(msg)
+
+    def publish_semantic(self, t, x):
+        """Callback to publish semantic state for monitoring."""
+        msg = Float32MultiArray()
+        msg.data = x.tolist()
+        self.semantic_pub.publish(msg)
+
+    def cortex_activity_callback(self, msg: Float32MultiArray):
+        """
+        Receive cortex activity from the visual cortex.
+
         Args:
             msg: Neural activity from the visual cortex
         """
-        actual = np.array(msg.data, dtype=np.float32)
-        
-        # Compute prediction error (surprise signal)
-        self.prediction_error = actual - self.current_prediction
-        
-        # Update internal model using prediction error
-        self._update_model()
-        
-        # Publish prediction error
-        error_msg = Float32MultiArray()
-        error_msg.data = self.prediction_error.tolist()
-        self.error_pub.publish(error_msg)
+        self.cortex_activity = np.array(msg.data, dtype=np.float32)
+
+    def error_feedback_callback(self, msg: Float32MultiArray):
+        """
+        Receive prediction error feedback from visual cortex for learning.
+
+        Args:
+            msg: Prediction error from visual cortex
+        """
+        self.prediction_error_feedback = np.array(msg.data, dtype=np.float32)
     
     def generate_prediction(self):
         """
-        Generate the next prediction based on the internal model.
-        
-        In dream mode, predictions are generated without sensory input,
-        allowing the system to "imagine" or "dream" experiences.
+        Main simulation loop - steps the Nengo simulator forward.
+
+        The Nengo network automatically:
+        - Compresses cortex activity to semantic pointers
+        - Integrates over slow timescales
+        - Decompresses to visual predictions
+        - Publishes outputs via output nodes
+        - Updates via PES learning from error signals
         """
-        if self.dream_mode:
-            # Dream mode: Free-running generation
-            noise = np.random.randn(64).astype(np.float32) * 0.1
-            self.current_prediction = np.tanh(
-                self.internal_model @ self.current_prediction + noise
-            )
+        if NENGO_AVAILABLE and hasattr(self, 'sim'):
+            self.sim.step()
         else:
-            # Awake mode: Prediction based on recent experience
-            self.current_prediction = np.tanh(
-                self.internal_model @ self.current_prediction
-            )
-        
-        # Publish prediction
-        pred_msg = Float32MultiArray()
-        pred_msg.data = self.current_prediction.tolist()
-        self.prediction_pub.publish(pred_msg)
+            # Fallback for when Nengo is not available
+            pass
     
-    def _update_model(self):
-        """
-        Update the internal generative model using prediction error.
-        
-        Implements a simplified Hebbian learning rule:
-        "Neurons that fire together, wire together"
-        """
-        learning_rate = 0.01
-        
-        # Outer product learning rule
-        delta = learning_rate * np.outer(
-            self.prediction_error,
-            self.current_prediction
-        )
-        
-        self.internal_model += delta
-        
-        # Normalize to prevent explosion
-        norm = np.linalg.norm(self.internal_model)
-        if norm > 10.0:
-            self.internal_model /= (norm / 10.0)
     
     def dream_mode_callback(self, msg: Bool):
         """

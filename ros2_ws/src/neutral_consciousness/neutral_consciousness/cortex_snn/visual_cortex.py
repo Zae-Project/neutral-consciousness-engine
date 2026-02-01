@@ -70,6 +70,22 @@ class VisualCortexNode(Node):
             10
         )
 
+        # Activity Publisher (for Dream Engine)
+        self.activity_pub = self.create_publisher(
+            Float32MultiArray,
+            '/neural_data/cortex_activity',
+            10
+        )
+
+        # Top-down Prediction Subscriber (from Dream Engine)
+        self.topdown_prediction = np.zeros(self.INPUT_DIM)
+        self.topdown_sub = self.create_subscription(
+            Float32MultiArray,
+            'dream/top_down_prediction',
+            self.topdown_callback,
+            10
+        )
+
         if NENGO_AVAILABLE:
             self.build_nengo_model()
             self.get_logger().info("Generative Model (Predictive Coding) Initialized.")
@@ -86,12 +102,15 @@ class VisualCortexNode(Node):
             # SENSORY LAYER: Represents the raw input from the Eye/Camera
             # We use a Node to inject the current_input from ROS into the Nengo graph
             self.sensory_input = nengo.Node(output=lambda t: self.current_input)
-            
+
+            # TOP-DOWN INPUT: Receives predictions from Dream Engine
+            self.topdown_input = nengo.Node(output=lambda t: self.topdown_prediction)
+
             # PREDICTION LAYER: The "Mind's Eye"
             # 1000 LIF (Leaky Integrate-and-Fire) neurons representing the cortex
             self.cortex = nengo.Ensemble(
-                n_neurons=1000, 
-                dimensions=self.INPUT_DIM, 
+                n_neurons=1000,
+                dimensions=self.INPUT_DIM,
                 neuron_type=nengo.LIF()
             )
             
@@ -99,6 +118,10 @@ class VisualCortexNode(Node):
             # The cortex tries to predict the sensory input based on past experience
             # We assume a 50ms delay to mimic biological synapses
             nengo.Connection(self.cortex, self.cortex, synapse=0.05)
+
+            # HIERARCHICAL TOP-DOWN: Dream Engine sends high-level predictions
+            # These predictions bias the cortex's representation
+            nengo.Connection(self.topdown_input, self.cortex, transform=0.5)
             
             # ERROR UNITS: The "Consciousness" Signal
             # This population ONLY fires when Reality (Input) != Prediction (Cortex)
@@ -118,6 +141,7 @@ class VisualCortexNode(Node):
             
             # Probes
             self.error_probe = nengo.Probe(self.error_units, synapse=0.01)
+            self.cortex_probe = nengo.Probe(self.cortex, synapse=0.01)
 
         # 2. Setup the Simulator
         self.sim = nengo.Simulator(self.model, dt=0.001)
@@ -134,30 +158,40 @@ class VisualCortexNode(Node):
             else:
                 self.current_input = np.pad(flat, (0, self.INPUT_DIM - len(flat)))
 
+    def topdown_callback(self, msg: Float32MultiArray):
+        """Receive top-down predictions from Dream Engine."""
+        self.topdown_prediction = np.array(msg.data, dtype=np.float32)
+
     def update_step(self):
         # This function steps the simulation forward
         if NENGO_AVAILABLE:
             self.sim.step()
-            
+
             if self.sim.data[self.error_probe].shape[0] > 0:
                 current_error = self.sim.data[self.error_probe][-1]
-                
+                current_cortex = self.sim.data[self.cortex_probe][-1]
+
                 # Publish Error
                 msg = Float32MultiArray()
                 msg.data = current_error.tolist()
                 self.error_pub.publish(msg)
-                
+
+                # Publish Cortex Activity (for Dream Engine)
+                activity_msg = Float32MultiArray()
+                activity_msg.data = current_cortex.tolist()
+                self.activity_pub.publish(activity_msg)
+
                 # Calculate Synchronization Health
                 # Euclidean distance of the error vector
                 error_magnitude = np.linalg.norm(current_error)
                 input_magnitude = np.linalg.norm(self.current_input)
-                
+
                 # Health = 1.0 - Relative Error (Clamped at 0)
                 # Avoid divide by zero
                 denom = input_magnitude if input_magnitude > 1e-6 else 1.0
                 rel_error = error_magnitude / denom
                 health = max(0.0, 1.0 - rel_error)
-                
+
                 # Publish Health
                 health_msg = Float32()
                 health_msg.data = float(health)

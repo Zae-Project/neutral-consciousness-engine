@@ -69,8 +69,8 @@ def generate_launch_description():
 
         # ============================================================
         # 2. Visual Cortex SNN (The "Brain" - Predictive Coding)
-        # Receives: unity/camera/raw
-        # Publishes: /neural_data/prediction_error, /synchronization_health
+        # Receives: unity/camera/raw, dream/top_down_prediction
+        # Publishes: /neural_data/prediction_error, /neural_data/cortex_activity, /synchronization_health
         # ============================================================
         Node(
             package='neutral_consciousness',
@@ -80,9 +80,10 @@ def generate_launch_description():
         ),
 
         # ============================================================
-        # 3. Dream Engine (Generative Model)
-        # Receives: cortex/visual/activity, dream/enable
-        # Publishes: dream/prediction, dream/prediction_error
+        # 3. Dream Engine (Generative Model - SPA Architecture)
+        # Receives: /neural_data/cortex_activity, /neural_data/prediction_error
+        # Publishes: dream/top_down_prediction, dream/semantic_state
+        # Architecture: 10,000 neurons (Compression, Semantic, Cleanup, Decompression)
         # ============================================================
         Node(
             package='neutral_consciousness',
@@ -90,7 +91,8 @@ def generate_launch_description():
             name='dream_engine',
             parameters=[
                 {'prediction_rate_hz': 30.0},
-                {'dream_mode': LaunchConfiguration('dream_mode')}
+                {'dream_mode': LaunchConfiguration('dream_mode')},
+                {'tau_slow': 100.0}  # MTRNN slow dynamics (ms)
             ],
             output='screen'
         ),
