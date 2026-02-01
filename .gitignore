@@ -31,3 +31,5 @@ log/
 venv/
 env/
 .env
+
+CLAUDE.md
