@@ -21,7 +21,7 @@ RELATED RESEARCH:
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float32MultiArray, Bool
+from std_msgs.msg import Float32MultiArray, Bool, Float32, String
 import numpy as np
 
 try:
@@ -29,6 +29,15 @@ try:
     NENGO_AVAILABLE = True
 except ImportError:
     NENGO_AVAILABLE = False
+
+# Import our consciousness monitoring modules
+try:
+    from .criticality_monitor import CriticalityMonitor
+    from .consciousness_metrics import ConsciousnessMetrics
+    CONSCIOUSNESS_MODULES_AVAILABLE = True
+except ImportError:
+    CONSCIOUSNESS_MODULES_AVAILABLE = False
+    print("Warning: Consciousness monitoring modules not available")
 
 
 class DreamEngine(Node):
@@ -112,7 +121,53 @@ class DreamEngine(Node):
             'dream/prediction_error',
             10
         )
-        
+
+        # NEW: Consciousness Metrics Publishers
+        self.criticality_pub = self.create_publisher(
+            Float32,
+            'consciousness/criticality/branching_ratio',
+            10
+        )
+
+        self.criticality_state_pub = self.create_publisher(
+            String,
+            'consciousness/criticality/state',
+            10
+        )
+
+        self.aci_pub = self.create_publisher(
+            Float32,
+            'consciousness/aci',
+            10
+        )
+
+        self.consciousness_prob_pub = self.create_publisher(
+            Float32,
+            'consciousness/probability',
+            10
+        )
+
+        # Initialize consciousness monitoring modules
+        if CONSCIOUSNESS_MODULES_AVAILABLE:
+            self.criticality_monitor = CriticalityMonitor(
+                window_size=100,
+                target_branching_ratio=1.0,
+                tolerance=0.1
+            )
+            self.consciousness_metrics = ConsciousnessMetrics(
+                history_length=50,
+                n_bins=10
+            )
+            self.get_logger().info("Consciousness monitoring modules initialized")
+        else:
+            self.criticality_monitor = None
+            self.consciousness_metrics = None
+            self.get_logger().warn("Consciousness monitoring disabled")
+
+        # Adaptive criticality tuning
+        self.adaptive_tuning_enabled = True
+        self.tau_slow_current = self.get_parameter('tau_slow').value
+
         # Prediction timer
         self.prediction_timer = self.create_timer(
             1.0 / self.prediction_rate,
@@ -321,9 +376,88 @@ class DreamEngine(Node):
         - Decompresses to visual predictions
         - Publishes outputs via output nodes
         - Updates via PES learning from error signals
+
+        PLUS (NEW): Monitors consciousness metrics:
+        - Critical brain dynamics (branching ratio, avalanches)
+        - Attribution Consciousness Index (ACI = f(Φ, κ))
+        - Adaptive parameter tuning to maintain criticality
         """
         if NENGO_AVAILABLE and hasattr(self, 'sim'):
             self.sim.step()
+
+            # ============================================================
+            # CONSCIOUSNESS MONITORING (Papers Implementation)
+            # ============================================================
+
+            if CONSCIOUSNESS_MODULES_AVAILABLE and self.criticality_monitor and self.consciousness_metrics:
+                # Extract current network state from probes
+                if len(self.sim.data[self.semantic_probe]) > 0:
+                    current_semantic = self.sim.data[self.semantic_probe][-1]
+
+                    # Get neural activity (approximated from semantic state magnitude)
+                    # In real implementation, would extract actual spike data from neurons
+                    neural_activity = np.abs(current_semantic[:64])  # Use first 64 dims as proxy
+
+                    # Create spike raster (binarized activity)
+                    spike_threshold = 0.1
+                    spike_raster = (neural_activity > spike_threshold).astype(float)
+
+                    # 1. UPDATE CRITICALITY MONITOR
+                    criticality_metrics = self.criticality_monitor.update(spike_raster)
+
+                    # Publish criticality metrics
+                    branching_msg = Float32()
+                    branching_msg.data = float(criticality_metrics['branching_ratio'])
+                    self.criticality_pub.publish(branching_msg)
+
+                    state_msg = String()
+                    state_msg.data = criticality_metrics['state']
+                    self.criticality_state_pub.publish(state_msg)
+
+                    # 2. ADAPTIVE TUNING (ConCrit Framework Implementation)
+                    if self.adaptive_tuning_enabled:
+                        param_name, adjustment = criticality_metrics['tuning_recommendation']
+
+                        if param_name == 'tau_rc' and adjustment != 1.0:
+                            # Adjust tau_slow to move toward criticality
+                            self.tau_slow_current *= adjustment
+
+                            # Clamp to reasonable range [50ms, 200ms]
+                            self.tau_slow_current = np.clip(self.tau_slow_current, 50.0, 200.0)
+
+                            # Log significant adjustments
+                            if abs(adjustment - 1.0) > 0.01:
+                                self.get_logger().info(
+                                    f'Criticality tuning: {criticality_metrics["state"]} → '
+                                    f'tau_slow={self.tau_slow_current:.1f}ms '
+                                    f'(σ={criticality_metrics["branching_ratio"]:.3f})'
+                                )
+
+                    # 3. UPDATE CONSCIOUSNESS METRICS (ACI Framework)
+                    consciousness_metrics = self.consciousness_metrics.update(
+                        semantic_state=current_semantic,
+                        neural_activity=neural_activity
+                    )
+
+                    # Publish ACI metrics
+                    aci_msg = Float32()
+                    aci_msg.data = float(consciousness_metrics['aci'])
+                    self.aci_pub.publish(aci_msg)
+
+                    prob_msg = Float32()
+                    prob_msg.data = float(consciousness_metrics['consciousness_probability'])
+                    self.consciousness_prob_pub.publish(prob_msg)
+
+                    # Log consciousness state transitions
+                    if consciousness_metrics['is_conscious'] and not hasattr(self, '_was_conscious'):
+                        self.get_logger().info(
+                            f'🧠 CONSCIOUSNESS EMERGED: ACI={consciousness_metrics["aci"]:.2f} '
+                            f'(Φ={consciousness_metrics["phi"]:.3f}, κ={consciousness_metrics["kappa"]:.3f})'
+                        )
+                        self._was_conscious = True
+                    elif not consciousness_metrics['is_conscious'] and hasattr(self, '_was_conscious'):
+                        self.get_logger().info('💤 Consciousness faded')
+                        delattr(self, '_was_conscious')
         else:
             # Fallback for when Nengo is not available
             pass
