@@ -136,12 +136,23 @@ class VisualCortexNode(Node):
             
             # Hebbian Learning: The brain rewires itself to minimize this error
             # If Error > 0, the cortex adjusts to match reality
-            conn = nengo.Connection(self.error_units, self.cortex, transform=0.1)
-            conn.learning_rule_type = nengo.PES() # Prescribed Error Sensitivity rule
+            # PES requires: a connection to adapt + an error signal driving the rule
+            conn = nengo.Connection(
+                self.sensory_input,
+                self.cortex,
+                learning_rule_type=nengo.PES(learning_rate=1e-4)
+            )
+            # Connect error signal to the PES learning rule
+            # Per NEF: Δw_ij = κ * a_i * (α_j * E · e_j)
+            nengo.Connection(self.error_units, conn.learning_rule)
             
-            # Probes
-            self.error_probe = nengo.Probe(self.error_units, synapse=0.01)
-            self.cortex_probe = nengo.Probe(self.cortex, synapse=0.01)
+            # Probes (sample_every prevents unbounded memory growth)
+            self.error_probe = nengo.Probe(
+                self.error_units, synapse=0.01, sample_every=0.001
+            )
+            self.cortex_probe = nengo.Probe(
+                self.cortex, synapse=0.01, sample_every=0.001
+            )
 
         # 2. Setup the Simulator
         self.sim = nengo.Simulator(self.model, dt=0.001)

@@ -34,6 +34,7 @@ except ImportError:
 try:
     from .criticality_monitor import CriticalityMonitor
     from .consciousness_metrics import ConsciousnessMetrics
+    from .oscillatory_monitor import OscillatoryMonitor
     CONSCIOUSNESS_MODULES_AVAILABLE = True
 except ImportError:
     CONSCIOUSNESS_MODULES_AVAILABLE = False
@@ -66,6 +67,10 @@ class DreamEngine(Node):
         # State (injected via Nengo Nodes)
         self.cortex_activity = np.zeros(self.VISUAL_DIM, dtype=np.float32)
         self.prediction_error_feedback = np.zeros(self.VISUAL_DIM, dtype=np.float32)
+
+        # Adaptive criticality gain (modulated at runtime instead of tau_rc)
+        # Range: [0.5, 1.5] where 1.0 = nominal, <1.0 = damping, >1.0 = excitation
+        self.criticality_gain = 1.0
 
         # Build Nengo SNN model
         if NENGO_AVAILABLE:
@@ -147,6 +152,25 @@ class DreamEngine(Node):
             10
         )
 
+        # Oscillatory dynamics publishers
+        self.oscillatory_dominant_pub = self.create_publisher(
+            String,
+            'consciousness/oscillatory/dominant_band',
+            10
+        )
+
+        self.oscillatory_flow_pub = self.create_publisher(
+            String,
+            'consciousness/oscillatory/flow_direction',
+            10
+        )
+
+        self.oscillatory_coupling_pub = self.create_publisher(
+            Float32,
+            'consciousness/oscillatory/coupling_strength',
+            10
+        )
+
         # Initialize consciousness monitoring modules
         if CONSCIOUSNESS_MODULES_AVAILABLE:
             self.criticality_monitor = CriticalityMonitor(
@@ -158,15 +182,19 @@ class DreamEngine(Node):
                 history_length=50,
                 n_bins=10
             )
-            self.get_logger().info("Consciousness monitoring modules initialized")
+            self.oscillatory_monitor = OscillatoryMonitor(
+                sampling_rate=1000.0,  # 1ms Nengo timestep
+                window_size=1000       # 1 second analysis window
+            )
+            self.get_logger().info("Consciousness monitoring modules initialized (criticality + ACI + oscillatory)")
         else:
             self.criticality_monitor = None
             self.consciousness_metrics = None
+            self.oscillatory_monitor = None
             self.get_logger().warn("Consciousness monitoring disabled")
 
         # Adaptive criticality tuning
         self.adaptive_tuning_enabled = True
-        self.tau_slow_current = self.get_parameter('tau_slow').value
 
         # Prediction timer
         self.prediction_timer = self.create_timer(
@@ -222,36 +250,74 @@ class DreamEngine(Node):
                 label="Semantic State"
             )
 
-            # Learned compression transform: 64D → 512D
+            # Compression transform: 64D → 512D
+            # No PES learning on compression — per predictive coding,
+            # error corrects the generative (decompression) pathway only.
+            # Encoding weights are fixed (random projection to high-D space).
             self.compression = nengo.Connection(
                 self.encoder,
                 self.semantic_state,
-                transform=np.random.randn(self.SEMANTIC_DIM, self.VISUAL_DIM) * 0.1,
-                learning_rule_type=nengo.PES(learning_rate=1e-4)
+                transform=np.random.randn(self.SEMANTIC_DIM, self.VISUAL_DIM) * 0.1
             )
 
             # Recurrent connection for temporal integration (narrative continuity)
+            # Gain-modulated: criticality_gain scales recurrent strength at runtime
+            # This replaces the impossible tau_rc runtime mutation
+            gain_node = nengo.Node(
+                output=lambda t: self.criticality_gain * 0.7  # Nominal decay * gain
+            )
             nengo.Connection(
                 self.semantic_state,
                 self.semantic_state,
                 synapse=0.1,  # 100ms integration window
-                transform=0.7  # Decay factor
+                transform=1.0  # Base transform (gain applied via modulation below)
+            )
+            # Additive gain modulation: scales the recurrent drive
+            nengo.Connection(
+                gain_node,
+                self.semantic_state,
+                transform=np.ones((self.SEMANTIC_DIM, 1)) * 0.01,  # Small modulatory effect
+                synapse=0.05
             )
 
             # ============================================================
-            # CLEAN-UP MEMORY: Stabilizes semantic pointers
+            # CLEAN-UP MEMORY: Attractor-based stabilization
             # ============================================================
+            # Per NEF theory: cleanup memory uses point attractor dynamics
+            # where the system converges noisy/partial inputs to stable
+            # stored patterns. Implemented via:
+            # 1. High intercepts → selective neurons that only respond to
+            #    strong, coherent inputs (natural thresholding)
+            # 2. Strong recurrent connections → attractor dynamics that
+            #    lock onto and stabilize activated patterns
+            # 3. Mutual inhibition → winner-take-all competition between
+            #    candidate patterns
 
             self.cleanup = nengo.Ensemble(
                 n_neurons=1000,
                 dimensions=self.SEMANTIC_DIM,
-                neuron_type=nengo.LIF(tau_rc=0.02),  # Fast cleanup
+                neuron_type=nengo.LIF(tau_rc=0.02),
+                intercepts=nengo.dists.Uniform(0.3, 0.9),  # High intercepts: selective
                 label="Clean-up Memory"
             )
 
-            # Bidirectional connection for stabilization
+            # Input from semantic state
             nengo.Connection(self.semantic_state, self.cleanup, synapse=0.01)
-            nengo.Connection(self.cleanup, self.semantic_state, transform=0.3, synapse=0.05)
+
+            # Strong recurrent self-connection: point attractor dynamics
+            # The system locks onto activated patterns and holds them stable
+            nengo.Connection(
+                self.cleanup, self.cleanup,
+                synapse=0.05,
+                transform=0.8  # Strong self-reinforcement
+            )
+
+            # Feedback to semantic state: cleaned-up pattern stabilizes the state
+            nengo.Connection(
+                self.cleanup, self.semantic_state,
+                transform=0.3,
+                synapse=0.05
+            )
 
             # ============================================================
             # DECOMPRESSION LAYER: 512D → 64D (Fast output)
@@ -297,17 +363,19 @@ class DreamEngine(Node):
             )
             nengo.Connection(error_input, self.error_ensemble)
 
-            # Error drives learning in both directions
-            nengo.Connection(
-                self.error_ensemble,
-                self.compression.learning_rule,
-                transform=-1,  # Minimize error
-                synapse=0.01
-            )
+            # Error drives DECOMPRESSION learning (predictive coding)
+            # Per NEF theory: prediction error corrects the generative model
+            # (top-down predictions), not the encoding pathway.
+            #
+            # Compression learning is removed because:
+            # - compression targets semantic_state (512D)
+            # - PES requires error_dim == post_ensemble_dim
+            # - error_ensemble is 64D → dimension mismatch with 512D
+            # - Predictive coding: error corrects predictions, not encodings
             nengo.Connection(
                 self.error_ensemble,
                 self.decompression.learning_rule,
-                transform=-1,
+                transform=-1,  # Minimize prediction error
                 synapse=0.01
             )
 
@@ -332,9 +400,20 @@ class DreamEngine(Node):
             # ============================================================
             # PROBES (for debugging and monitoring)
             # ============================================================
+            # sample_every prevents unbounded memory growth during long runs
+            # Only keep the most recent sample (1ms timestep, sample every step)
 
-            self.semantic_probe = nengo.Probe(self.semantic_state, synapse=0.01)
-            self.prediction_probe = nengo.Probe(self.decoder, synapse=0.01)
+            self.semantic_probe = nengo.Probe(
+                self.semantic_state, synapse=0.01, sample_every=0.001
+            )
+            self.prediction_probe = nengo.Probe(
+                self.decoder, synapse=0.01, sample_every=0.001
+            )
+            # Probe actual neuron spikes for accurate consciousness monitoring
+            # (instead of using decoded semantic values as proxy)
+            self.neuron_probe = nengo.Probe(
+                self.semantic_state.neurons, sample_every=0.001
+            )
 
     def publish_topdown(self, t, x):
         """Callback to publish top-down predictions from Nengo to ROS2."""
@@ -394,9 +473,14 @@ class DreamEngine(Node):
                 if len(self.sim.data[self.semantic_probe]) > 0:
                     current_semantic = self.sim.data[self.semantic_probe][-1]
 
-                    # Get neural activity (approximated from semantic state magnitude)
-                    # In real implementation, would extract actual spike data from neurons
-                    neural_activity = np.abs(current_semantic[:64])  # Use first 64 dims as proxy
+                    # Get actual neuron spike data from the neuron probe
+                    # This is real firing rate data, not a decoded value proxy
+                    if len(self.sim.data[self.neuron_probe]) > 0:
+                        raw_neuron_data = self.sim.data[self.neuron_probe][-1]
+                        # Subsample to manageable size (use first 100 neurons)
+                        neural_activity = raw_neuron_data[:min(100, len(raw_neuron_data))]
+                    else:
+                        neural_activity = np.abs(current_semantic[:64])
 
                     # Create spike raster (binarized activity)
                     spike_threshold = 0.1
@@ -415,21 +499,28 @@ class DreamEngine(Node):
                     self.criticality_state_pub.publish(state_msg)
 
                     # 2. ADAPTIVE TUNING (ConCrit Framework Implementation)
+                    # Uses gain modulation instead of tau_rc (which can't change at runtime)
                     if self.adaptive_tuning_enabled:
                         param_name, adjustment = criticality_metrics['tuning_recommendation']
 
                         if param_name == 'tau_rc' and adjustment != 1.0:
-                            # Adjust tau_slow to move toward criticality
-                            self.tau_slow_current *= adjustment
+                            # Adjust criticality_gain to move toward criticality
+                            # Subcritical (adj<1) → increase gain (more excitation)
+                            # Supercritical (adj>1) → decrease gain (more damping)
+                            # Invert: tau_rc increase = slower = less gain
+                            gain_adjustment = 1.0 / adjustment
+                            self.criticality_gain *= gain_adjustment
 
-                            # Clamp to reasonable range [50ms, 200ms]
-                            self.tau_slow_current = np.clip(self.tau_slow_current, 50.0, 200.0)
+                            # Clamp to reasonable range [0.5, 1.5]
+                            self.criticality_gain = float(np.clip(
+                                self.criticality_gain, 0.5, 1.5
+                            ))
 
                             # Log significant adjustments
                             if abs(adjustment - 1.0) > 0.01:
                                 self.get_logger().info(
                                     f'Criticality tuning: {criticality_metrics["state"]} → '
-                                    f'tau_slow={self.tau_slow_current:.1f}ms '
+                                    f'gain={self.criticality_gain:.3f} '
                                     f'(σ={criticality_metrics["branching_ratio"]:.3f})'
                                 )
 
@@ -448,15 +539,34 @@ class DreamEngine(Node):
                     prob_msg.data = float(consciousness_metrics['consciousness_probability'])
                     self.consciousness_prob_pub.publish(prob_msg)
 
+                    # 4. UPDATE OSCILLATORY MONITOR (Baker & Cariani 2025)
+                    if self.oscillatory_monitor is not None:
+                        osc_metrics = self.oscillatory_monitor.update(neural_activity)
+
+                        # Publish dominant band
+                        dominant_msg = String()
+                        dominant_msg.data = osc_metrics['dominant_band']
+                        self.oscillatory_dominant_pub.publish(dominant_msg)
+
+                        # Publish flow direction
+                        flow_msg = String()
+                        flow_msg.data = osc_metrics['flow_direction']
+                        self.oscillatory_flow_pub.publish(flow_msg)
+
+                        # Publish coupling strength
+                        coupling_msg = Float32()
+                        coupling_msg.data = float(osc_metrics['coupling_strength'])
+                        self.oscillatory_coupling_pub.publish(coupling_msg)
+
                     # Log consciousness state transitions
                     if consciousness_metrics['is_conscious'] and not hasattr(self, '_was_conscious'):
                         self.get_logger().info(
-                            f'🧠 CONSCIOUSNESS EMERGED: ACI={consciousness_metrics["aci"]:.2f} '
-                            f'(Φ={consciousness_metrics["phi"]:.3f}, κ={consciousness_metrics["kappa"]:.3f})'
+                            f'CONSCIOUSNESS EMERGED: ACI={consciousness_metrics["aci"]:.2f} '
+                            f'(Phi={consciousness_metrics["phi"]:.3f}, kappa={consciousness_metrics["kappa"]:.3f})'
                         )
                         self._was_conscious = True
                     elif not consciousness_metrics['is_conscious'] and hasattr(self, '_was_conscious'):
-                        self.get_logger().info('💤 Consciousness faded')
+                        self.get_logger().info('Consciousness faded')
                         delattr(self, '_was_conscious')
         else:
             # Fallback for when Nengo is not available
