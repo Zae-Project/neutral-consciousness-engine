@@ -26,12 +26,14 @@ setup(
             # Core SNN Nodes
             'cortex_node = neutral_consciousness.cortex_snn.visual_cortex:main',
             'dream_node = neutral_consciousness.cortex_snn.dream_engine:main',
-            
+            'tectum_node = neutral_consciousness.cortex_snn.sensory_tectum:main',
+            'limbic_node = neutral_consciousness.cortex_snn.limbic_node:main',
+
             # Neural Firewall Nodes
             'firewall_node = neutral_consciousness.neural_firewall.traffic_monitor:main',
             'latency_injector_node = neutral_consciousness.neural_firewall.latency_injector:main',
             'he_node = neutral_consciousness.neural_firewall.homomorphic_encryption:main',
-            
+
             # Test Nodes
             'split_brain_node = neutral_consciousness.tests.split_brain_test:main',
         ],

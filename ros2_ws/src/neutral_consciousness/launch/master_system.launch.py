@@ -3,12 +3,14 @@ Master System Launch File - Neutral Consciousness Engine
 
 Launches the complete "Mind" system:
 1. ROS-TCP Endpoint (Unity Bridge)
-2. Visual Cortex SNN (Predictive Coding)
-3. Dream Engine (Generative Model)
-4. Neural Firewall (Brainjacking Defense)
-5. Homomorphic Encryption Node (Satellite Security)
-6. Latency Injector (OISL Simulation)
-7. Split Brain Test (Hemispheric Protocol)
+2. Visual Cortex SNN (Isomorphic Topographic Predictive Coding)
+3. Sensory Tectum (Fast Multisensory Convergence — Step 1 Consciousness)
+4. Limbic Node (Affective Valence & Dopamine Modulation)
+5. Dream Engine (Generative Model / Pallium — Step 2 Consciousness)
+6. Neural Firewall (Brainjacking Defense)
+7. Homomorphic Encryption Node (Satellite Security)
+8. Latency Injector (OISL Simulation)
+9. Split Brain Test (Hemispheric Protocol)
 
 Usage:
     ros2 launch neutral_consciousness master_system.launch.py
@@ -80,8 +82,39 @@ def generate_launch_description():
         ),
 
         # ============================================================
-        # 3. Dream Engine (Generative Model - SPA Architecture)
-        # Receives: /neural_data/cortex_activity, /neural_data/prediction_error
+        # 3. Sensory Tectum (Fast Multisensory Convergence — Step 1)
+        # Receives: /neural_data/cortex_activity, /neural_data/spatial_error_map,
+        #           /unity/proprioception
+        # Publishes: /tectum/unified_map, /tectum/salience_map, /tectum/reflex_motor
+        # Architecture: 2,000 LIF neurons (5ms tau_rc, ultra-fast)
+        # ============================================================
+        Node(
+            package='neutral_consciousness',
+            executable='tectum_node',
+            name='sensory_tectum',
+            output='screen'
+        ),
+
+        # ============================================================
+        # 4. Limbic Node (Affective Valence & Dopamine Modulation)
+        # Receives: /unity/battery_level, /unity/collision_damage,
+        #           /unity/goal_proximity, /unity/threat_distance,
+        #           /neural_data/prediction_error
+        # Publishes: /consciousness/affective/valence, /consciousness/affective/dopamine,
+        #            /consciousness/affective/state, /consciousness/affective/reward_prediction_error
+        # Architecture: 500 LIF neurons (VTA + PAG + Habenula)
+        # ============================================================
+        Node(
+            package='neutral_consciousness',
+            executable='limbic_node',
+            name='limbic_node',
+            output='screen'
+        ),
+
+        # ============================================================
+        # 5. Dream Engine (Generative Model / Pallium — Step 2)
+        # Receives: /neural_data/cortex_activity, /neural_data/prediction_error,
+        #           /tectum/unified_map, /consciousness/affective/dopamine
         # Publishes: dream/top_down_prediction, dream/semantic_state
         # Architecture: 10,000 neurons (Compression, Semantic, Cleanup, Decompression)
         # ============================================================

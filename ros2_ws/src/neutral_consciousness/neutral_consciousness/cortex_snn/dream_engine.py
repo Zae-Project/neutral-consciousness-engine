@@ -43,19 +43,26 @@ except ImportError:
 
 class DreamEngine(Node):
     """
-    ROS 2 Node implementing the Generative Model.
-    
-    The Dream Engine continuously generates predictions about
-    incoming sensory data, updating its internal model based
-    on prediction errors.
+    ROS 2 Node implementing the Generative Model (Pallium).
+
+    The Dream Engine is the "pallium" — the higher cortical area that
+    generates top-down predictions about incoming sensory data. This is
+    Step 2 of Feinberg & Mallatt's two-step consciousness hypothesis:
+    the dorsal pallium gradually became the dominant center of sensory
+    consciousness, integrating deep memory and abstract reasoning.
+
+    Now integrates:
+    - Tectum unified map (fast multisensory input)
+    - Dopamine modulation from limbic node (affective learning gating)
+    - Topographic 8x8 output for spatial mental image reconstruction
     """
-    
+
     def __init__(self):
         super().__init__('dream_engine')
 
         # Dimensions
         self.SEMANTIC_DIM = 512  # High-dimensional semantic pointers
-        self.VISUAL_DIM = 64     # Low-dimensional visual features
+        self.VISUAL_DIM = 64     # Low-dimensional visual features (8x8 grid)
 
         # Configuration
         self.declare_parameter('prediction_rate_hz', 30.0)
@@ -67,6 +74,10 @@ class DreamEngine(Node):
         # State (injected via Nengo Nodes)
         self.cortex_activity = np.zeros(self.VISUAL_DIM, dtype=np.float32)
         self.prediction_error_feedback = np.zeros(self.VISUAL_DIM, dtype=np.float32)
+        self.tectum_map = np.zeros(self.VISUAL_DIM, dtype=np.float32)
+
+        # Dopamine modulation from limbic node (default: full learning)
+        self.dopamine_signal = 1.0
 
         # Adaptive criticality gain (modulated at runtime instead of tau_rc)
         # Range: [0.5, 1.5] where 1.0 = nominal, <1.0 = damping, >1.0 = excitation
@@ -99,6 +110,22 @@ class DreamEngine(Node):
             Bool,
             'dream/enable',
             self.dream_mode_callback,
+            10
+        )
+
+        # Tectum unified map subscriber (fast multisensory input)
+        self.tectum_sub = self.create_subscription(
+            Float32MultiArray,
+            '/tectum/unified_map',
+            self.tectum_callback,
+            10
+        )
+
+        # Dopamine modulation subscriber (from Limbic Node)
+        self.dopamine_sub = self.create_subscription(
+            Float32,
+            '/consciousness/affective/dopamine',
+            self.dopamine_callback,
             10
         )
 
@@ -224,6 +251,7 @@ class DreamEngine(Node):
 
             cortex_input = nengo.Node(output=lambda t: self.cortex_activity)
             error_input = nengo.Node(output=lambda t: self.prediction_error_feedback)
+            tectum_input = nengo.Node(output=lambda t: self.tectum_map)
 
             # ============================================================
             # COMPRESSION LAYER: 64D → 512D (Fast dynamics)
@@ -236,6 +264,10 @@ class DreamEngine(Node):
                 label="Encoder"
             )
             nengo.Connection(cortex_input, self.encoder)
+
+            # Tectum unified map also feeds the encoder (multisensory input)
+            # Weighted lower than direct cortex since tectum is a summary
+            nengo.Connection(tectum_input, self.encoder, transform=0.3)
 
             # ============================================================
             # SEMANTIC STATE: 512D with SLOW dynamics
@@ -261,10 +293,10 @@ class DreamEngine(Node):
             )
 
             # Recurrent connection for temporal integration (narrative continuity)
-            # Gain-modulated: criticality_gain scales recurrent strength at runtime
-            # This replaces the impossible tau_rc runtime mutation
+            # Gain = criticality_gain × dopamine modulation
+            # Criticality tunes toward σ≈1.0, dopamine gates affective engagement
             gain_node = nengo.Node(
-                output=lambda t: self.criticality_gain * 0.7  # Nominal decay * gain
+                output=lambda t: self.criticality_gain * (0.5 + 0.5 * self.dopamine_signal) * 0.7
             )
             nengo.Connection(
                 self.semantic_state,
@@ -444,7 +476,29 @@ class DreamEngine(Node):
             msg: Prediction error from visual cortex
         """
         self.prediction_error_feedback = np.array(msg.data, dtype=np.float32)
-    
+
+    def tectum_callback(self, msg: Float32MultiArray):
+        """
+        Receive unified multisensory map from the sensory tectum.
+
+        The tectum provides a fast, pre-integrated spatial representation
+        combining vision + proprioception. This is the "Step 1" conscious
+        input from the evolutionary older midbrain structure.
+        """
+        data = np.array(msg.data, dtype=np.float32)
+        if len(data) == self.VISUAL_DIM:
+            self.tectum_map = data
+
+    def dopamine_callback(self, msg: Float32):
+        """
+        Receive dopamine modulation signal from the Limbic Node.
+
+        Scales the recurrent gain and effectively modulates how strongly
+        the dream engine updates its internal model. High dopamine =
+        salient event = stronger learning and integration.
+        """
+        self.dopamine_signal = float(np.clip(msg.data, 0.0, 1.0))
+
     def generate_prediction(self):
         """
         Main simulation loop - steps the Nengo simulator forward.
