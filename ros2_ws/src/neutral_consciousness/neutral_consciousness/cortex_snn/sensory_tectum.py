@@ -74,6 +74,9 @@ class SensoryTectum(Node):
         # Salience threshold for reflexive response
         self.SALIENCE_THRESHOLD = 0.3
 
+        # Reentrant binding feedback (from reentrant processor)
+        self.bound_representation = np.zeros(self.VISUAL_DIM, dtype=np.float32)
+
         # ============================================================
         # ROS2 SUBSCRIBERS
         # ============================================================
@@ -99,6 +102,14 @@ class SensoryTectum(Node):
             Float32MultiArray,
             '/unity/proprioception',
             self.proprio_callback,
+            10
+        )
+
+        # Reentrant bound representation (feedback from binding loop)
+        self.reentrant_sub = self.create_subscription(
+            Float32MultiArray,
+            '/reentrant/bound_representation',
+            self.reentrant_callback,
             10
         )
 
@@ -174,6 +185,7 @@ class SensoryTectum(Node):
             visual_input = nengo.Node(output=lambda t: self.visual_map)
             proprio_input = nengo.Node(output=lambda t: self.proprioception)
             error_input = nengo.Node(output=lambda t: self.spatial_error)
+            reentrant_input = nengo.Node(output=lambda t: self.bound_representation)
 
             # ============================================================
             # VISUAL MAP LAYER: Fast isomorphic processing
@@ -223,12 +235,34 @@ class SensoryTectum(Node):
 
             # Proprioception → Convergence (projected to 64D visual space)
             # The 16D proprioceptive state is mapped onto the 64D spatial
-            # grid via a learned/fixed projection. This is how the tectum
-            # aligns body-state information with visual spatial coordinates.
-            proprio_to_visual = np.random.randn(self.VISUAL_DIM, self.PROPRIO_DIM) * 0.1
+            # grid via a structured somatotopic projection. Each of the 16
+            # proprioceptive channels maps to a 4-cell region of the 8×8 grid,
+            # arranged as a 4×4 body map upscaled to 8×8. This gives the
+            # tectum a coarse spatial representation of body state aligned
+            # with visual coordinates (somatotopic-retinotopic registration).
+            proprio_to_visual = np.zeros((self.VISUAL_DIM, self.PROPRIO_DIM))
+            for p in range(self.PROPRIO_DIM):
+                # Map 16 proprioceptive channels to 4×4 body grid → 8×8 visual
+                body_row = (p // 4) * 2  # Each body cell covers 2×2 visual cells
+                body_col = (p % 4) * 2
+                for dr in range(2):
+                    for dc in range(2):
+                        vis_idx = (body_row + dr) * self.GRID_SIZE + (body_col + dc)
+                        if vis_idx < self.VISUAL_DIM:
+                            proprio_to_visual[vis_idx, p] = 0.25  # Spread evenly
             nengo.Connection(
                 self.proprio_layer, self.convergence,
                 transform=proprio_to_visual * 0.3,  # Weaker modality
+                synapse=0.005
+            )
+
+            # Reentrant feedback: bound representation from reentrant processor
+            # This closes the tectum → reentrant → tectum loop, allowing
+            # top-down pallial predictions to modulate tectal convergence.
+            # Only arrives when binding has converged (internal agreement).
+            nengo.Connection(
+                reentrant_input, self.convergence,
+                transform=0.2,  # Moderate influence
                 synapse=0.005
             )
 
@@ -334,6 +368,12 @@ class SensoryTectum(Node):
         data = np.array(msg.data, dtype=np.float32)
         if len(data) == self.VISUAL_DIM:
             self.spatial_error = np.abs(data)  # Salience = |error|
+
+    def reentrant_callback(self, msg: Float32MultiArray):
+        """Receive converged bound representation from reentrant processor."""
+        data = np.array(msg.data, dtype=np.float32)
+        if len(data) == self.VISUAL_DIM:
+            self.bound_representation = data
 
     def proprio_callback(self, msg: Float32MultiArray):
         """Receive proprioceptive state from Unity digital twin."""

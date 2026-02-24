@@ -6,11 +6,12 @@ Launches the complete "Mind" system:
 2. Visual Cortex SNN (Isomorphic Topographic Predictive Coding)
 3. Sensory Tectum (Fast Multisensory Convergence — Step 1 Consciousness)
 4. Limbic Node (Affective Valence & Dopamine Modulation)
-5. Dream Engine (Generative Model / Pallium — Step 2 Consciousness)
-6. Neural Firewall (Brainjacking Defense)
-7. Homomorphic Encryption Node (Satellite Security)
-8. Latency Injector (OISL Simulation)
-9. Split Brain Test (Hemispheric Protocol)
+5. Reentrant Processor (Bidirectional Binding — Consciousness Gate)
+6. Dream Engine (Generative Model / Pallium — Step 2 Consciousness)
+7. Neural Firewall (Brainjacking Defense)
+8. Homomorphic Encryption Node (Satellite Security)
+9. Latency Injector (OISL Simulation)
+10. Split Brain Test (Hemispheric Protocol)
 
 Usage:
     ros2 launch neutral_consciousness master_system.launch.py
@@ -112,10 +113,32 @@ def generate_launch_description():
         ),
 
         # ============================================================
-        # 5. Dream Engine (Generative Model / Pallium — Step 2)
+        # 5. Reentrant Processor (Bidirectional Binding — Consciousness Gate)
+        # Receives: /tectum/unified_map, dream/top_down_prediction,
+        #           /consciousness/affective/dopamine
+        # Publishes: /reentrant/bound_representation, /reentrant/binding_error,
+        #            /reentrant/converged, /reentrant/error_map
+        # Architecture: 4,000 LIF neurons (bottom-up + top-down + binding + convergence)
+        # ============================================================
+        Node(
+            package='neutral_consciousness',
+            executable='reentrant_node',
+            name='reentrant_processor',
+            parameters=[
+                {'convergence_threshold': 0.15},
+                {'max_iterations': 10},
+                {'binding_rate_hz': 100.0}
+            ],
+            output='screen'
+        ),
+
+        # ============================================================
+        # 6. Dream Engine (Generative Model / Pallium — Step 2)
         # Receives: /neural_data/cortex_activity, /neural_data/prediction_error,
-        #           /tectum/unified_map, /consciousness/affective/dopamine
-        # Publishes: dream/top_down_prediction, dream/semantic_state
+        #           /tectum/unified_map, /consciousness/affective/dopamine,
+        #           /reentrant/bound_representation
+        # Publishes: dream/top_down_prediction, dream/semantic_state,
+        #            dream/topographic_reconstruction
         # Architecture: 10,000 neurons (Compression, Semantic, Cleanup, Decompression)
         # ============================================================
         Node(

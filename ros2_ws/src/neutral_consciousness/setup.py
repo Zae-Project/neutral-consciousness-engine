@@ -28,6 +28,7 @@ setup(
             'dream_node = neutral_consciousness.cortex_snn.dream_engine:main',
             'tectum_node = neutral_consciousness.cortex_snn.sensory_tectum:main',
             'limbic_node = neutral_consciousness.cortex_snn.limbic_node:main',
+            'reentrant_node = neutral_consciousness.cortex_snn.reentrant_processor:main',
 
             # Neural Firewall Nodes
             'firewall_node = neutral_consciousness.neural_firewall.traffic_monitor:main',
