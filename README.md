@@ -28,7 +28,7 @@
 
 ## Overview
 
-This repository implements the **"Generative Model"** for the Watanabe Transfer Protocol - a theoretical framework for seamless consciousness substrate transfer. It serves as the **"Neutral Consciousness"** synthetic hemisphere required for hemisphere integration.
+This repository implements the **"Generative Model"** for the Watanabe Transfer Protocol. It is a theoretical framework for seamless consciousness substrate transfer. It serves as the **"Neutral Consciousness"** synthetic hemisphere required for hemisphere integration.
 
 ### What is the Watanabe Transfer Protocol?
 
