@@ -24,13 +24,27 @@ The Neutral Consciousness Engine represents a novel approach to consciousness si
 
 ### 1.1 The Problem of Consciousness Transfer
 
-Traditional approaches to consciousness preservation face a fundamental issue: the "teleporter problem." If we copy neural patterns to a new substrate, we create a duplicate rather than transferring the original consciousness. The subjective locus—the "I" that experiences reality—remains in the biological brain until death.
+Traditional approaches to consciousness preservation face a fundamental issue: the "teleporter problem." If we copy neural patterns to a new substrate, we create a duplicate rather than transferring the original consciousness. The subjective locus, the "I" that experiences reality, remains in the biological brain until death.
 
 ---
 
 ## 2. Core Principles
 
-### 2.1 The Generative Model (True Predictive Coding)
+### 2.1 Scientific Foundation - Watanabe-Inspired Approach
+
+**IMPORTANT DISCLAIMER:** This project is inspired by and builds upon the research approach 
+of Professor Masataka Watanabe, particularly:
+
+- **Watanabe, M., et al. (2014).** "Interhemispheric transfer of visual information in split-brain patients." 
+  *Neuropsychologia*, 63, 133-142. DOI: 10.1016/j.neuropsychologia.2014.08.025
+
+- **Watanabe's Neutral Consciousness Framework** (referenced in project documentation)
+
+**This is NOT the official work of Professor Watanabe.** We are independent researchers applying 
+principles from his publications to explore consciousness substrate transfer. Any errors, 
+limitations, or speculative elements are entirely our own.
+
+### 2.2 The Generative Model (True Predictive Coding)
 
 The system implements the "Generative Model" of consciousness. Unlike standard neural networks that react to input, our implementation continuously *predicts* incoming sensory data.
 
@@ -40,11 +54,14 @@ The system implements the "Generative Model" of consciousness. Unlike standard n
 - **Error Units:** A specialized population that computes `Error = Input - Prediction`.
 - **Optimization:** The system transmits only the *prediction error* (the "surprise") to the satellite, minimizing bandwidth requirements for the OISL link. This aligns with the Free Energy Principle (Friston, 2010).
 
-### 2.2 The Watanabe Transfer Protocol
+### 2.3 The Watanabe Transfer Protocol (Inspired Framework)
 
-A theoretical framework for interfacing biological neural networks with artificial substrates, ensuring continuity of consciousness during transfer.
+A theoretical framework for interfacing biological neural networks with artificial substrates, 
+ensuring continuity of consciousness during transfer. This framework is **inspired by** 
+Watanabe's hemisphere integration research but represents our own interpretation and 
+application of those principles.
 
-### 2.3 Transmissive Synthesis
+### 2.4 Transmissive Synthesis
 
 A purely productive model of cortex is a necessary but insufficient basis for hemispheric transfer. Peer-reviewed work on the *transmissive theory of brain function* (Rouleau & Cimino, 2022) reports that neurons respond to ambient and self-generated electromagnetic fields as weak as 0.5 mV/mm via **ephaptic coupling**, and that mammalian θ/α rhythms phase-lock to the Earth's Schumann cavity modes (7.83 Hz + harmonics). If the biological hemisphere consumes even a fraction of this transmissive input, a synthetic hemisphere that replicates only the Friston-style predictive computation will *appear* to synchronise (low prediction error) while in fact diverging on an input the productive model cannot see. The Stage 1 Shadow-Mode gate would then produce a false positive and Stage 2 hemispheric switches would dissociate.
 
@@ -96,7 +113,7 @@ Once synchronization is confirmed, a reversible pharmacological agent (e.g., pro
 The hypothesis predicts that the subject will report a unified visual field. Specifically, if an object passes across the vertical meridian from the biological side (left visual field) to the synthetic side (right visual field), the subject should experience continuous motion without temporal disjoint. A report of "blindsight" (acting on the object without seeing it) would falsify the hypothesis.
 
 ### Stage 4: Orbital Migration (The Libet Limit)
-To validate space-travel capabilities, the computation of the Synthetic Hemisphere is migrated from the local edge node to a LEO satellite via Optical Inter-Satellite Link (OISL). We predict that as long as the total Round-Trip Latency (RTL) remains under 200ms—well within the 500ms "time-to-consciousness" delay identified by Libet—the subject will perceive no disruption in the continuity of the "Now."
+To validate space-travel capabilities, the computation of the Synthetic Hemisphere is migrated from the local edge node to a LEO satellite via Optical Inter-Satellite Link (OISL). We predict that as long as the total Round-Trip Latency (RTL) remains under 200ms, well within the 500ms "time-to-consciousness" delay identified by Libet, the subject will perceive no disruption in the continuity of the "Now."
 
 ---
 

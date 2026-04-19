@@ -1,14 +1,25 @@
 """
-Homomorphic Encryption Module for Neural Firewall
+Homomorphic Encryption Module for Neural Firewall (Hybrid TEE Architecture)
 
-Implements a wrapper for processing neural signals with homomorphic encryption,
-ensuring the satellite can process data WITHOUT knowing what it means.
+Implements homomorphic encryption for the Watanabe Transfer Protocol's
+security requirements, ensuring the satellite can process neural data
+WITHOUT knowing what it means.
+
+SCIENTIFIC/SECURITY BASIS:
+- Hybrid TEE Architecture (Nguyen et al., 2025)
+- Homomorphic encryption for identity handshake
+- AES-256 for real-time neural stream (implemented elsewhere)
+- CKKS scheme (TenSEAL) for approximate computation on encrypted data
+
+NOTE: This implements security concepts for a system inspired by Watanabe's
+hemisphere integration research. This is NOT official work of Professor Watanabe.
 
 Security Model:
-1. Biological Brain encrypts spikes: E(x)
+1. Biological Brain encrypts spikes: E(x) using private key
 2. Satellite processes encrypted data: E(x) + E(y) = E(x + y)
-3. Biological Brain decrypts result
+3. Biological Brain decrypts result with private key
 
+Threat Model:
 If hackers seize the satellite, they only see encrypted noise.
 They cannot read thoughts or inject commands without the private key.
 """
