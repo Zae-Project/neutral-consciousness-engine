@@ -11,6 +11,9 @@ nengo>=3.0.0
 # Numerical Computing
 numpy>=1.21.0
 
+# Signal processing for PLV (Butterworth band-pass + Hilbert transform)
+scipy>=1.8.0
+
 # =============================================================================
 # Optional Dependencies
 # =============================================================================

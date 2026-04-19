@@ -24,6 +24,7 @@ Prerequisites:
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.actions import ExecuteProcess, DeclareLaunchArgument
+from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
 
 
@@ -47,10 +48,31 @@ def generate_launch_description():
         description='Enable homomorphic encryption for satellite communication'
     )
 
+    em_driver_enabled_arg = DeclareLaunchArgument(
+        'em_driver_enabled',
+        default_value='true',
+        description='Enable the ambient EM driver (transmissive layer)'
+    )
+
+    em_mode_arg = DeclareLaunchArgument(
+        'em_mode',
+        default_value='schumann',
+        description="Ambient EM waveform: 'schumann' | 'noise' | 'silent'"
+    )
+
+    ephaptic_enabled_arg = DeclareLaunchArgument(
+        'ephaptic_enabled',
+        default_value='true',
+        description='Wire the firewall-cleared EM field into the cortex via ephaptic coupling'
+    )
+
     return LaunchDescription([
         rtt_arg,
         dream_mode_arg,
         encryption_arg,
+        em_driver_enabled_arg,
+        em_mode_arg,
+        ephaptic_enabled_arg,
         
         # ============================================================
         # 1. ROS-TCP Endpoint (Bridge to Unity)
@@ -142,15 +164,38 @@ def generate_launch_description():
 
         # ============================================================
         # 7. Split Brain Test (Uni-hemispheric Subjective Protocol)
-        # Receives: /camera/left_eye, /camera/right_eye, /synchronization_health
-        # Publishes: /conscious_output/unified_field
+        # Receives: /camera/left_eye, /camera/right_eye,
+        #           /synchronization_health, /transmissive_sync/plv
+        # Publishes: /conscious_output/unified_field,
+        #            /transmissive_sync/gate_ready
         # Service: /trigger_hemispheric_switch
+        # Gate requires sync_health >= 0.95 AND plv >= 0.8 for 3s.
         # ============================================================
         Node(
             package='neutral_consciousness',
             executable='split_brain_node',
             name='split_brain_test',
             output='screen'
+        ),
+
+        # ============================================================
+        # 8. Ambient EM Driver (Transmissive Layer, exogenous)
+        # Publishes: /environment/em_field_raw
+        # The Neural Firewall republishes to /environment/em_field
+        # after safety checks; the cortex subscribes to that, never
+        # to the raw topic.
+        # ============================================================
+        Node(
+            package='neutral_consciousness',
+            executable='em_driver_node',
+            name='em_driver',
+            parameters=[
+                {'em_mode': LaunchConfiguration('em_mode')},
+                {'publish_rate_hz': 1000.0},
+                {'output_voltage_mv': 5.0},
+            ],
+            output='screen',
+            condition=IfCondition(LaunchConfiguration('em_driver_enabled')),
         ),
 
         # ============================================================

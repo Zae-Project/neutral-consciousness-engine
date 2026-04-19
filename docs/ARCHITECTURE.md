@@ -39,13 +39,15 @@ The system implements a "Mind-Body" architecture for consciousness simulation:
 ### 1. Visual Cortex (`cortex_node`)
 **File:** `cortex_snn/visual_cortex.py`
 
-Implements True Predictive Coding using Nengo SNN.
+Implements True Predictive Coding using Nengo SNN. Also hosts the transmissive layer: the firewall-cleared ambient EM field is wired into the cortex via the ephaptic-coupling scalar field, and the rolling θ-band PLV between cortex rate and EM reference is published for the hemispheric gate.
 
 | Direction | Topic | Type | Description |
 |-----------|-------|------|-------------|
 | Subscribe | `unity/camera/raw` | `sensor_msgs/Image` | Raw camera feed from Unity |
+| Subscribe | `/environment/em_field` | `std_msgs/Float32MultiArray` | Firewall-cleared ambient EM (drives the ephaptic field) |
 | Publish | `/neural_data/prediction_error` | `std_msgs/Float32MultiArray` | Prediction error signal |
 | Publish | `/synchronization_health` | `std_msgs/Float32` | Sync health (0.0-1.0) |
+| Publish | `/transmissive_sync/plv` | `std_msgs/Float32` | θ-band Phase-Locking Value (0.0-1.0) |
 
 ### 2. Dream Engine (`dream_node`)
 **File:** `cortex_snn/dream_engine.py`
@@ -67,12 +69,28 @@ Brainjacking defense system with real-time FFT analysis.
 | Direction | Topic | Type | Description |
 |-----------|-------|------|-------------|
 | Subscribe | `/satellite_uplink/incoming_data` | `std_msgs/Float32MultiArray` | Incoming satellite data |
+| Subscribe | `/environment/em_field_raw` | `std_msgs/Float32MultiArray` | Raw ambient EM drive (transmissive input) |
 | Publish | `/verified_neural_stream` | `std_msgs/Float32MultiArray` | Verified safe data |
+| Publish | `/environment/em_field` | `std_msgs/Float32MultiArray` | Firewall-cleared ambient EM |
 | Publish | `firewall/kill_switch` | `std_msgs/Bool` | Emergency disconnect signal |
 
 **Safety Thresholds:**
 - Max Frequency: 150 Hz (seizure prevention)
 - Voltage Limit: 100 mV (excitotoxicity prevention)
+
+### 3b. Ambient EM Driver (`em_driver_node`)
+**File:** `cortex_snn/em_driver.py`
+
+Exogenous transmissive-layer driver. Publishes a deterministic Schumann-cavity reference (7.83 Hz + first four harmonics) at 1 kHz, 5 mV peak. Routed through the Neural Firewall before reaching the cortex.
+
+| Direction | Topic | Type | Description |
+|-----------|-------|------|-------------|
+| Publish | `/environment/em_field_raw` | `std_msgs/Float32MultiArray` | Raw ambient EM samples |
+
+**Parameters:**
+- `em_mode`: `schumann` (default) | `noise` | `silent`
+- `publish_rate_hz`: 1000.0
+- `output_voltage_mv`: 5.0
 
 ### 4. Latency Injector (`latency_injector_node`)
 **File:** `neural_firewall/latency_injector.py`
@@ -104,19 +122,29 @@ Secure neural data processing using CKKS scheme.
 ### 6. Split Brain Test (`split_brain_node`)
 **File:** `tests/split_brain_test.py`
 
-Implements the Uni-hemispheric Subjective Protocol.
+Implements the Uni-hemispheric Subjective Protocol with dual-criterion gate.
 
 | Direction | Topic | Type | Description |
 |-----------|-------|------|-------------|
 | Subscribe | `/camera/left_eye` | `sensor_msgs/Image` | Biological hemisphere input |
 | Subscribe | `/camera/right_eye` | `sensor_msgs/Image` | Synthetic hemisphere input |
-| Subscribe | `/synchronization_health` | `std_msgs/Float32` | Health metric |
+| Subscribe | `/synchronization_health` | `std_msgs/Float32` | Productive convergence metric |
+| Subscribe | `/transmissive_sync/plv` | `std_msgs/Float32` | Transmissive convergence metric |
 | Publish | `/conscious_output/unified_field` | `sensor_msgs/Image` | Unified visual field |
+| Publish | `/transmissive_sync/gate_ready` | `std_msgs/Bool` | Sustained dual-criterion gate |
 | Service | `/trigger_hemispheric_switch` | `std_srvs/Trigger` | Switch hemisphere mode |
+
+**Gate:** `sync_health ≥ 0.95` AND `plv ≥ 0.80`, sustained for 3 s.
 
 **Modes:**
 - **Shadow Mode:** Synthetic hemisphere learning only (gated output)
 - **Active Mode:** Synthetic hemisphere merged with biological
+
+## Future Work
+
+### Reserved: Biophoton / UPE Optical Side-Channel
+
+Topic `/environment/biophoton_channel` is reserved for the ultraweak-photon-emission (UPE) optical pathway described in Rouleau & Cimino (2022) but not yet implemented. It would carry a non-visual optical reference (analogous to the current EM driver) for substrates that may couple via Opsin3/5 or axonal light-guiding. Deferred until the scalar EM loop is validated end-to-end.
 
 ## Unity Components
 
@@ -208,6 +236,9 @@ ros2 launch neutral_consciousness master_system.launch.py
 |----------|---------|-------------|
 | `round_trip_time_ms` | 20.0 | OISL latency simulation |
 | `dream_mode` | false | Start Dream Engine in dream mode |
+| `em_driver_enabled` | true | Enable the ambient EM driver node |
+| `em_mode` | schumann | EM waveform: `schumann` \| `noise` \| `silent` |
+| `ephaptic_enabled` | true | (reserved) Toggle for disabling the ephaptic block in ablation runs |
 
 ### Individual Node Launch
 
@@ -232,6 +263,8 @@ ros2 run neutral_consciousness latency_injector_node --ros-args -p round_trip_ti
 3. **Libet's Delay:** Libet, B. (1985). Unconscious cerebral initiative. *Behavioral and Brain Sciences*.
 4. **Brainjacking:** Pycroft, L., et al. (2016). Implant Security. *World Neurosurgery*.
 5. **Hybrid TEE:** Nguyen, T., et al. (2025). Hybrid TEE for BCI Latency Optimization. *IEEE TBME*.
+6. **Transmissive Theory:** Rouleau, N., & Cimino, N. (2022). A Transmissive Theory of Brain Function. *NeuroSci* 3(3): 440–456.
+7. **Phase-Locking Value:** Lachaux, J.-P., et al. (1999). Measuring phase synchrony in brain signals. *Human Brain Mapping* 8: 194–208.
 
 ## Version
 

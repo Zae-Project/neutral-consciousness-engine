@@ -51,19 +51,43 @@ class NeuralFirewall(Node):
             '/verified_neural_stream',
             10
         )
-        
+
         # Publisher for kill switch - Unity subscribes to this for emergency disconnect
         self.kill_switch_pub = self.create_publisher(
             Bool,
             'firewall/kill_switch',
             10  # QoS: Reliable delivery
         )
-        
+
+        # Firewall-cleared ambient EM channel. The cortex subscribes to this
+        # instead of the raw driver topic so spoofed Schumann-harmonic
+        # injections are rejected at the same gate as any other neural stream.
+        self.em_safe_pub = self.create_publisher(
+            Float32MultiArray,
+            '/environment/em_field',
+            10
+        )
+
+        # Rolling buffer of EM samples so the FFT can resolve low frequencies
+        # (Schumann fundamental is 7.83 Hz — useless to FFT a single sample).
+        self._em_buffer: list[float] = []
+        self._em_buffer_size = int(self.SAMPLE_RATE_HZ)  # 1 s window
+
         # Subscriber for incoming satellite data
         self.subscription = self.create_subscription(
             Float32MultiArray,
             '/satellite_uplink/incoming_data',
             self.inspect_packet,
+            10
+        )
+
+        # Subscriber for raw ambient EM driver. Goes through the same safety
+        # checks as the neural stream before being republished on
+        # `/environment/em_field`.
+        self.em_subscription = self.create_subscription(
+            Float32MultiArray,
+            '/environment/em_field_raw',
+            self.inspect_em_packet,
             10
         )
         
@@ -189,6 +213,52 @@ class NeuralFirewall(Node):
         heartbeat_msg = Bool()
         heartbeat_msg.data = self.kill_switch_active
         self.kill_switch_pub.publish(heartbeat_msg)
+
+    def inspect_em_packet(self, msg):
+        """
+        Inspect raw ambient EM samples against the same safety thresholds as
+        the neural stream. A spoofed 200 Hz Schumann harmonic or an
+        over-voltage environmental drive must trip the same kill switch as
+        any other malicious stream.
+
+        The EM driver publishes one scalar per message at ~1 kHz; a single
+        sample is not enough to FFT, so we buffer up to SAMPLE_RATE_HZ samples
+        (1 s) and run the amplitude check on every packet, the frequency
+        check once the buffer is full.
+        """
+        if self.kill_switch_active:
+            return
+        if not msg.data:
+            return
+
+        sample = float(msg.data[0])
+
+        # Amplitude check on every sample.
+        if abs(sample) > self.VOLTAGE_LIMIT_MV:
+            self.trigger_kill_switch(
+                f"EM Over-Voltage Attack ({abs(sample):.1f}mV > "
+                f"{self.VOLTAGE_LIMIT_MV}mV)"
+            )
+            return
+
+        # Maintain rolling buffer for the frequency check.
+        self._em_buffer.append(sample)
+        if len(self._em_buffer) > self._em_buffer_size:
+            self._em_buffer.pop(0)
+
+        if len(self._em_buffer) == self._em_buffer_size:
+            dominant_freq = self.calculate_frequency(
+                np.array(self._em_buffer)
+            )
+            if dominant_freq > self.MAX_FREQUENCY_HZ:
+                self.trigger_kill_switch(
+                    f"EM High-Frequency Attack ({dominant_freq:.1f}Hz > "
+                    f"{self.MAX_FREQUENCY_HZ}Hz)"
+                )
+                return
+
+        # Safe — republish to the firewall-cleared topic.
+        self.em_safe_pub.publish(msg)
 
     def forward_to_brain(self, msg):
         """

@@ -44,6 +44,20 @@ The system implements the "Generative Model" of consciousness. Unlike standard n
 
 A theoretical framework for interfacing biological neural networks with artificial substrates, ensuring continuity of consciousness during transfer.
 
+### 2.3 Transmissive Synthesis
+
+A purely productive model of cortex is a necessary but insufficient basis for hemispheric transfer. Peer-reviewed work on the *transmissive theory of brain function* (Rouleau & Cimino, 2022) reports that neurons respond to ambient and self-generated electromagnetic fields as weak as 0.5 mV/mm via **ephaptic coupling**, and that mammalian θ/α rhythms phase-lock to the Earth's Schumann cavity modes (7.83 Hz + harmonics). If the biological hemisphere consumes even a fraction of this transmissive input, a synthetic hemisphere that replicates only the Friston-style predictive computation will *appear* to synchronise (low prediction error) while in fact diverging on an input the productive model cannot see. The Stage 1 Shadow-Mode gate would then produce a false positive and Stage 2 hemispheric switches would dissociate.
+
+The engine therefore augments the productive model with a minimal transmissive channel: (a) an exogenous ambient-EM driver publishing a Schumann-harmonic reference, (b) an ephaptic-coupling block that sums a low-passed self-field with the firewall-cleared EM drive and broadcasts the scalar as a uniform additive bias to the cortex ensemble (never as a direct input — doing so would trivialise the coherence metric), and (c) a Phase-Locking Value (PLV) estimator over the θ band. The Shadow-Mode gate is upgraded to a dual-criterion sustained test:
+
+> *Hemispheric switch admitted iff `sync_health ≥ 0.95` AND `plv ≥ 0.80` for 3 consecutive seconds.*
+
+Both criteria falsifiable independently: the productive error can fall while PLV stays low (synthetic side reproduces statistics but not phase), or PLV can rise spuriously while prediction error remains large. The gate only opens when the synthetic hemisphere has matched the biological one on both axes.
+
+This augmentation is also consistent with the substrate-independence claim at the heart of the transfer protocol: if sentience is multiply realisable across biological and engineered media (Rouleau & Levin, forthcoming), the engineered medium must reproduce the *mechanisms* through which the biological medium couples to its environment, not only its internal inference.
+
+The ambient EM channel is routed through the same Neural Firewall that guards the satellite uplink (§3.2–3.3); a spoofed Schumann-harmonic injection at seizure-inducing frequencies is rejected at the same gate as any other malicious stream. The transmissive layer strengthens, rather than weakens, the Pycroft-style defences.
+
 ---
 
 ## 3. Safety & Cybersecurity (Hybrid TEE)
@@ -94,6 +108,9 @@ To validate space-travel capabilities, the computation of the Synthetic Hemisphe
 4. Friston, K. (2010). The free-energy principle. *Nature Reviews Neuroscience*.
 5. Pycroft, L., et al. (2016). Brainjacking: Implant Security. *World Neurosurgery*.
 6. Nguyen, T., et al. (2025). Hybrid TEE for BCI Latency Optimization. *IEEE TBME*.
+7. Rouleau, N., & Cimino, N. (2022). A Transmissive Theory of Brain Function: Implications for Free Will, Consciousness, and Mental Health. *NeuroSci* 3(3): 440–456.
+8. Rouleau, N., & Levin, M. (forthcoming). Multiple Realizability of Sentience in Living Systems and Beyond. *Consciousness Engineering* collection.
+9. Lachaux, J.-P., Rodriguez, E., Martinerie, J., & Varela, F. J. (1999). Measuring phase synchrony in brain signals. *Human Brain Mapping* 8: 194–208.
 
 ---
 

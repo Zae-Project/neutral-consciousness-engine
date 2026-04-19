@@ -14,7 +14,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
     ],
-    install_requires=['setuptools', 'nengo', 'numpy'],
+    install_requires=['setuptools', 'nengo', 'numpy', 'scipy'],
     zip_safe=True,
     maintainer='Neutral Consciousness Team',
     maintainer_email='info@theconsciousness.ai',
@@ -26,6 +26,7 @@ setup(
             # Core SNN Nodes
             'cortex_node = neutral_consciousness.cortex_snn.visual_cortex:main',
             'dream_node = neutral_consciousness.cortex_snn.dream_engine:main',
+            'em_driver_node = neutral_consciousness.cortex_snn.em_driver:main',
             
             # Neural Firewall Nodes
             'firewall_node = neutral_consciousness.neural_firewall.traffic_monitor:main',

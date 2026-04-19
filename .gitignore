@@ -31,3 +31,10 @@ log/
 venv/
 env/
 .env
+**/__pycache__/
+
+# --- Local-only project journal (see CLAUDE.md for contents) ---
+CLAUDE.md
+
+# --- Claude Code local metadata (per-machine settings, worktrees, etc.) ---
+.claude/
