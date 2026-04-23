@@ -470,11 +470,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines (coming soon).
 
 ## Related Projects
 
-Part of the **Zae Project** ecosystem:
+Part of the **Zae Project** 4-pillar stack. This repo is the **Engine** pillar.
 
-- **[arkspace-core](https://github.com/Zae-Project/arkspace-core)** - Satellite infrastructure layer
-- **[brain-emulation](https://github.com/Zae-Project/brain-emulation)** - Corpus callosum BCI interface
-- **[zae-docs](https://github.com/Zae-Project/zae-docs)** - Unified documentation and research
+| Pillar | Repo | Role |
+|---|---|---|
+| 🛰️ Infrastructure | [arkspace-core](https://github.com/Zae-Project/arkspace-core) | LEO satellite constellation hosting the SNN payload. Defines the <50 ms RTT and 50-200W envelope this engine must fit in. |
+| 🧠 Interface | [brain-emulation](https://github.com/Zae-Project/brain-emulation) | Biological-fidelity Brian2 SNN templates and 3D visualizer. Shared benchmarks (Allen Motor Cortex, split-brain). |
+| ⚡ **Engine** | **neutral-consciousness-engine** (this repo) | **Nengo + ROS 2 SNN runtime. Predictive-coding dream engine. Neural Firewall. Watanabe/Sperry split-brain protocol.** |
+| 🌡️ Substrate | [thermodynamic-core](https://github.com/Zae-Project/thermodynamic-core) | Physical computing paradigm (p-bits, Langevin). Target substrate this engine compiles onto via Onsager-Machlup. |
+| 📚 Docs | [zae-docs](https://github.com/Zae-Project/zae-docs) | Authoritative bibliography, unified architecture, researcher directory. |
 
 ---
 
