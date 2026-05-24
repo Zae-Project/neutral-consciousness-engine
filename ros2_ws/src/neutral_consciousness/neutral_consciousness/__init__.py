@@ -14,7 +14,7 @@ Scientific Basis:
 - Split-Brain Research (Sperry, 1968)
 - Libet's Temporal Buffer (Libet, 1985)
 
-Repository: https://github.com/venturaEffect/neutral-consciousness-engine
+Repository: https://github.com/Zae-Project/neutral-consciousness-engine
 """
 
 __version__ = '0.1.0'
