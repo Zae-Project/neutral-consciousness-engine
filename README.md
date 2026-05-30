@@ -28,7 +28,7 @@
 
 ## Overview
 
-This repository implements the **"Generative Model"** for the Watanabe Transfer Protocol. It is a theoretical framework for seamless consciousness substrate transfer. It serves as the **"Neutral Consciousness"** synthetic hemisphere required for hemisphere integration.
+This repository implements the **"Generative Model"** for the Watanabe Transfer Protocol. It is a theoretical framework for consciousness substrate transfer. It serves as the **"Neutral Consciousness"** synthetic hemisphere required for hemisphere integration.
 
 ### What is the Watanabe Transfer Protocol?
 
@@ -40,7 +40,7 @@ A theoretical framework for interfacing biological neural networks with artifici
 
 1. **Scientific Exploration**: Investigate whether consciousness can operate on synthetic substrates
 2. **Predictive Coding**: Implement generative models that minimize bandwidth via prediction error
-3. **Security**: Ensure neural data cannot be hijacked or compromised
+3. **Security**: Prevent neural data from being hijacked or compromised
 4. **Validation**: Create falsifiable tests for the hemisphere integration hypothesis
 
 ---
@@ -81,7 +81,7 @@ DOI: [10.1016/j.neuropsychologia.2014.08.025](https://doi.org/10.1016/j.neuropsy
 **Security:**
 - **Pycroft, L., et al. (2016).** "Brainjacking: Implant security issues in invasive neuromodulation." *World Neurosurgery*, 92, 454-462.
 
-### Comprehensive Bibliography
+### Bibliography
 
 For a complete list of 100+ researchers, 50+ papers, and 35+ books, see:
 - **[Zae Project Bibliography](https://github.com/Zae-Project/zae-docs/blob/main/reference/bibliography.md)**
@@ -418,7 +418,7 @@ ros2 topic echo /firewall/kill_switch
 
 ### Zae Project Bibliography
 
-For comprehensive research materials supporting this project:
+For research materials supporting this project:
 
 **[Zae Project Bibliography](https://github.com/Zae-Project/zae-docs/blob/main/reference/bibliography.md)**
 - **100+ Key Researchers** - Leading scientists in consciousness, BCIs, neuromorphic computing, WBE

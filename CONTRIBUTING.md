@@ -1,6 +1,6 @@
 # Contributing to Neutral Consciousness Engine
 
-Thank you for your interest in contributing to the Neutral Consciousness Engine! This project maintains strict scientific and professional standards to ensure all work is grounded in legitimate research.
+Thank you for your interest in contributing to the Neutral Consciousness Engine! This project maintains strict scientific and professional standards to keep all work grounded in legitimate research.
 
 ---
 

@@ -1,4 +1,4 @@
-# Seamless Transfer of the Conscious Locus
+# Continuous Transfer of the Conscious Locus
 
 **A Protocol for Hemispheric Integration via Generative Spiking Neural Networks and Inter-Satellite Optical Links**
 
@@ -6,9 +6,9 @@
 
 ## Abstract
 
-**Introduction:** The biological limitations of the human brain pose a fundamental barrier to deep space exploration and longevity. Current proposals for "mind uploading" rely on destructive scanning, resulting in a copy rather than a transfer of the subjective locus. This paper proposes a medical protocol for seamless continuity of consciousness during substrate transfer.
+**Introduction:** The biological limitations of the human brain pose a fundamental barrier to deep space exploration and longevity. Current proposals for "mind uploading" rely on destructive scanning, resulting in a copy rather than a transfer of the subjective locus. This paper proposes a medical protocol for continuity of consciousness during substrate transfer.
 
-**The Hypothesis:** We hypothesize that consciousness is not substrate-dependent but relies on a specific "Generative Model" algorithm that predicts sensory inputs. Therefore, a biological hemisphere can integrate with a synthetic hemisphere if the latter replicates this generative architecture and maintains strict corpus callosum-like connectivity.
+**The Hypothesis:** We hypothesize that consciousness depends on a specific "Generative Model" algorithm that predicts sensory inputs, rather than on the substrate itself. Therefore, a biological hemisphere can integrate with a synthetic hemisphere if the latter replicates this generative architecture and maintains strict corpus callosum-like connectivity.
 
 **Evaluation:** Drawing on Sperry's split-brain research and Watanabe's "neutral consciousness" framework, we argue that a double-sided CMOS micro-electrode array implanted in the dissected corpus callosum can bridge biological and synthetic cortices. To address latency in space travel, we propose that the 500ms temporal lag of biological consciousness (Libet's delay) allows for a functional "buffer," enabling the synthetic hemisphere to reside on a Low Earth Orbit (LEO) satellite network connected via low-latency (<20ms) Optical Inter-Satellite Links (OISL).
 
@@ -65,7 +65,7 @@ application of those principles.
 
 A purely productive model of cortex is a necessary but insufficient basis for hemispheric transfer. Peer-reviewed work on the *transmissive theory of brain function* (Rouleau & Cimino, 2022) reports that neurons respond to ambient and self-generated electromagnetic fields as weak as 0.5 mV/mm via **ephaptic coupling**, and that mammalian θ/α rhythms phase-lock to the Earth's Schumann cavity modes (7.83 Hz + harmonics). If the biological hemisphere consumes even a fraction of this transmissive input, a synthetic hemisphere that replicates only the Friston-style predictive computation will *appear* to synchronise (low prediction error) while in fact diverging on an input the productive model cannot see. The Stage 1 Shadow-Mode gate would then produce a false positive and Stage 2 hemispheric switches would dissociate.
 
-The engine therefore augments the productive model with a minimal transmissive channel: (a) an exogenous ambient-EM driver publishing a Schumann-harmonic reference, (b) an ephaptic-coupling block that sums a low-passed self-field with the firewall-cleared EM drive and broadcasts the scalar as a uniform additive bias to the cortex ensemble (never as a direct input — doing so would trivialise the coherence metric), and (c) a Phase-Locking Value (PLV) estimator over the θ band. The Shadow-Mode gate is upgraded to a dual-criterion sustained test:
+The engine therefore augments the productive model with a minimal transmissive channel: (a) an exogenous ambient-EM driver publishing a Schumann-harmonic reference, (b) an ephaptic-coupling block that sums a low-passed self-field with the firewall-cleared EM drive and broadcasts the scalar as a uniform additive bias to the cortex ensemble (never as a direct input, doing so would trivialise the coherence metric), and (c) a Phase-Locking Value (PLV) estimator over the θ band. The Shadow-Mode gate is upgraded to a dual-criterion sustained test:
 
 > *Hemispheric switch admitted iff `sync_health ≥ 0.95` AND `plv ≥ 0.80` for 3 consecutive seconds.*
 
@@ -81,7 +81,7 @@ The ambient EM channel is routed through the same Neural Firewall that guards th
 
 ### 3.1 The Latency/Security Trade-off
 
-Full Homomorphic Encryption (HE) introduces ~1.0s latency per sample (Nguyen et al., 2025), which exceeds the 500ms "Libet Buffer" required for seamless consciousness. Exceeding this buffer causes dissociation or "lag" in the subjective experience.
+Full Homomorphic Encryption (HE) introduces ~1.0s latency per sample (Nguyen et al., 2025), which exceeds the 500ms "Libet Buffer" required for continuous consciousness. Exceeding this buffer causes dissociation or "lag" in the subjective experience.
 
 ### 3.2 Hybrid Trusted Execution Environment (TEE)
 

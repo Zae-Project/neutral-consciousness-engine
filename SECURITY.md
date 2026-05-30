@@ -156,12 +156,12 @@ The Neutral Consciousness Engine implements:
    - **Status**: Kill switch implemented but not stress-tested
    - **Impact**: May not trigger fast enough under attack
    - **Mitigation**: Conservative safety thresholds
-   - **Fix Target**: v0.8 (comprehensive attack simulation)
+   - **Fix Target**: v0.8 (full attack simulation)
 
 3. **Plaintext Neural Data on Localhost**
    - **Status**: ROS 2 topics unencrypted on loopback
    - **Impact**: Local eavesdropping possible
-   - **Mitigation**: Ensure no untrusted processes on system
+   - **Mitigation**: Keep untrusted processes off the system
    - **Fix Target**: v1.0 (encrypted DDS transport)
 
 #### 🟠 HIGH
@@ -269,7 +269,7 @@ export ROS_SECURITY_STRATEGY=Enforce
 ### Planned (Security Roadmap)
 
 #### v0.8 (Hardening Phase)
-- [ ] Comprehensive input validation for all ROS messages
+- [ ] Full input validation for all ROS messages
 - [ ] Attack simulation test suite
 - [ ] Security documentation and threat modeling
 - [ ] Audit logging for all critical events
